@@ -2,7 +2,7 @@
 
 ## Qué verifiqué en la base
 
-- `viajeraentailandia@gmail.com` (user_id `42d5…c131ac`) **sí tiene membresía** en el viaje "Tailandia con el Alma" con rol `organizadora` y los 8 permisos en `true`.
+- Una organizadora invitada ([email y user_id redactados]) **sí tiene membresía** en el viaje "Tailandia con el Alma" con rol `organizadora` y los 8 permisos en `true`.
 - Las políticas de acceso y los permisos de tabla (`trips`, `trip_members`) están correctos: no es un problema de base de datos ni de RLS.
 
 ## Causa

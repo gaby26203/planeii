@@ -2,6 +2,8 @@ import { defineConfig, devices } from "@playwright/test";
 
 export default defineConfig({
   testDir: "./e2e",
+  // Los *.test.ts de esta carpeta son tests unitarios de Bun (`bun run test`).
+  testMatch: "**/*.spec.ts",
   fullyParallel: false,
   workers: 1,
   retries: 0,

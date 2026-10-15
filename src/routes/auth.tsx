@@ -2,7 +2,6 @@ import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Compass, Mail, Lock, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -108,15 +107,13 @@ function AuthPage() {
   async function handleGoogle() {
     setLoading(true);
     try {
-      const result = await lovable.auth.signInWithOAuth("google", {
-        redirect_uri: returnUrl(),
+      // Supabase redirige a Google y vuelve a /auth con la sesión en la URL;
+      // el cliente la detecta al iniciar y el efecto de arriba completa la redirección.
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: { redirectTo: returnUrl() },
       });
-      if (result.error) {
-        toast.error(result.error.message || "No se pudo iniciar sesión con Google");
-        return;
-      }
-      if (result.redirected) return;
-      redirectAfterAuth();
+      if (error) toast.error(error.message || "No se pudo iniciar sesión con Google");
     } finally {
       setLoading(false);
     }

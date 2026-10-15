@@ -1,4 +1,5 @@
 import { normalizeCtaLinks, type CtaLink } from "@/lib/cta-links";
+import { resolveTemplateAssets } from "@/lib/trip-assets";
 import { OAXACA_LEGACY_DATA, type TripAnnouncement, type TripData } from "@/data/trip";
 import type { CSSProperties } from "react";
 import { defaultBookingForm, normalizeBookingForm, type BookingForm } from "@/lib/booking-form";
@@ -148,6 +149,8 @@ export function createEditorDocument(trip: TripData): EditorDocument {
 }
 
 export function normalizeEditorDocument(value: Partial<EditorDocument> | null | undefined, fallbackTrip: TripData): EditorDocument {
+  // Documentos guardados en Lovable pueden apuntar a su CDN de imágenes; se re-mapean al leer.
+  value = resolveTemplateAssets(value);
   const base = createEditorDocument(value?.contentBase === "oaxaca-legacy" ? OAXACA_LEGACY_DATA : fallbackTrip);
   if (!value?.trip) return base;
   const incoming = value.trip as Partial<TripData>;

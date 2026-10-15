@@ -2,22 +2,8 @@
 // No es la plantilla de viajes nuevos: esa es NEUTRAL_TRIP_DATA (./neutral-trip.ts).
 
 // Los textos entre [CORCHETES] son placeholders: sustitúyelos por información real.
-import heroAsset from "@/assets/hero.jpg.asset.json";
-const hero = heroAsset.url;
-import cocinaAsset from "@/assets/cocina.jpg.asset.json";
-const cocina = cocinaAsset.url;
-import artesanosAsset from "@/assets/artesanos.jpg.asset.json";
-const artesanos = artesanosAsset.url;
-import mezcalAsset from "@/assets/mezcal.jpg.asset.json";
-const mezcal = mezcalAsset.url;
-import mercadoAsset from "@/assets/mercado.jpg.asset.json";
-const mercado = mercadoAsset.url;
-import hotelAsset from "@/assets/hotel.jpg.asset.json";
-const hotel = hotelAsset.url;
-import nocheAsset from "@/assets/noche.jpg.asset.json";
-const noche = nocheAsset.url;
-import finalAsset from "@/assets/final.jpg.asset.json";
-const final = finalAsset.url;
+import { TEMPLATE_ASSETS } from "@/lib/template-assets";
+const { hero, cocina, artesanos, mezcal, mercado, hotel, noche, final } = TEMPLATE_ASSETS;
 
 export const BOOKING_URL = "[INSERTAR URL DE RESERVA]";
 

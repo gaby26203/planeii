@@ -58,16 +58,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         name: "twitter:description",
         content: "Plataforma de gestión operativa para viajes grupales de mujeres",
       },
-      {
-        property: "og:image",
-        content:
-          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/494b2cd7-5811-42c7-a5ae-1105e8dc6aa6/id-preview-b9d10cea--e3d19316-27e6-4085-9c2f-85d829b6c97a.lovable.app-1783135572483.png",
-      },
-      {
-        name: "twitter:image",
-        content:
-          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/494b2cd7-5811-42c7-a5ae-1105e8dc6aa6/id-preview-b9d10cea--e3d19316-27e6-4085-9c2f-85d829b6c97a.lovable.app-1783135572483.png",
-      },
       { name: "twitter:card", content: "summary_large_image" },
       { property: "og:type", content: "website" },
     ],

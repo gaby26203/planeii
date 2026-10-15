@@ -1,1 +1,13 @@
-project_id = "lunltdndozqjwmdyonuj"
+# Configuración del CLI de Supabase para desarrollo local (`supabase start`).
+# Para el proyecto remoto usá `supabase link --project-ref <ref>`; este archivo no lo afecta.
+# Antes contenía el project_id del proyecto gestionado por Lovable Cloud.
+project_id = "planeii"
+
+[auth]
+site_url = "http://localhost:8080"
+additional_redirect_urls = ["http://localhost:8080/auth", "http://localhost:8080/reset-password"]
+
+[auth.external.google]
+enabled = false
+client_id = "env(SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID)"
+secret = "env(SUPABASE_AUTH_EXTERNAL_GOOGLE_SECRET)"

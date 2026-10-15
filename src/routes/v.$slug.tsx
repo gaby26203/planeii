@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { TripLanding } from "@/components/trip/TripLanding";
 import { editorThemeClass, editorThemeStyle } from "@/lib/trip-editor";
 import { bookingHrefFor, fetchPublishedPage } from "@/lib/published-page";
+import { absoluteSiteUrl } from "@/lib/site-url";
 
 export const Route = createFileRoute("/v/$slug")({
   loader: async ({ params }) => {
@@ -15,11 +16,7 @@ export const Route = createFileRoute("/v/$slug")({
     const { trip } = loaderData.document;
     const title = `${trip.destination} · ${trip.brand}`;
     const heroSrc = trip.heroImage?.src ?? "";
-    const ogImage = heroSrc.startsWith("http")
-      ? heroSrc
-      : heroSrc.startsWith("/")
-        ? `https://planeii.lovable.app${heroSrc}`
-        : "";
+    const ogImage = absoluteSiteUrl(heroSrc);
     return {
       meta: [
         { title },

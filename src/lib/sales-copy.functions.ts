@@ -31,11 +31,10 @@ export const generateSalesCopy = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) => inputSchema.parse(input))
   .handler(async ({ data }): Promise<SalesCopyResult> => {
-    const apiKey = process.env.LOVABLE_API_KEY;
-    if (!apiKey) return { ok: false, error: "La IA no está configurada todavía." };
+    const { readAiConfig, createResponsesModel } = await import("./ai-gateway.server");
+    const config = readAiConfig();
+    if (!config) return { ok: false, error: "La IA no está configurada todavía." };
     const { streamText, Output, NoObjectGeneratedError, APICallError } = await import("ai");
-    const { createGatewayResponsesProvider } = await import("./ai-gateway.server");
-    const provider = createGatewayResponsesProvider(apiKey);
 
     const prompt = `Detalles del viaje grupal para mujeres:
 - Destino: ${data.destination}
@@ -48,7 +47,7 @@ export const generateSalesCopy = createServerFn({ method: "POST" })
 
     try {
       const result = streamText({
-        model: provider.responses("openai/gpt-6-astra"),
+        model: createResponsesModel(config),
         system: `Sos redactora experta en marketing de viajes grupales para mujeres. Escribí en español neutro textos promocionales para una página de venta. Reglas: título de máximo 12 palabras; subtítulo de 1-2 frases; storyHeading exactamente 2 frases cortas; storyParagraphs exactamente 3 párrafos de 2-4 frases; highlights exactamente 4 (título corto + descripción de 1-2 frases); faq exactamente 5 preguntas frecuentes útiles con respuestas breves; finalHeading una frase de cierre; finalButton 2-4 palabras; finalNote una frase breve. No inventes precios ni datos concretos que no se te dieron.`,
         prompt,
         output: Output.object({ schema: outputSchema }),
@@ -79,8 +78,8 @@ export const generateSalesCopy = createServerFn({ method: "POST" })
       }
       const status = APICallError.isInstance(error) ? error.statusCode : undefined;
       if (status === 429) return { ok: false, error: "Demasiadas solicitudes. Esperá un momento e intentá otra vez." };
-      if (status === 402) return { ok: false, error: "No quedan créditos de IA. Recargalos en Ajustes → Planes y créditos." };
-      if (status === 403) return { ok: false, error: "El uso de IA está bloqueado para este espacio de trabajo." };
+      if (status === 402) return { ok: false, error: "El proveedor de IA no tiene saldo disponible. Revisá la cuenta del proveedor." };
+      if (status === 401 || status === 403) return { ok: false, error: "El proveedor de IA rechazó la clave configurada (AI_API_KEY)." };
       console.error("generateSalesCopy failed", error);
       return { ok: false, error: "No se pudieron generar los textos. Intentá de nuevo." };
     }

@@ -27,6 +27,7 @@ import { Route as AuthenticatedReportesRouteImport } from './routes/_authenticat
 import { Route as InvitacionTokenRouteImport } from './routes/invitacion.$token'
 import { Route as VSlugRouteImport } from './routes/v.$slug'
 import { Route as AuthenticatedViajesTripIdRouteImport } from './routes/_authenticated/viajes.$tripId'
+import { Route as ApiDevEmailPreviewRouteImport } from './routes/api/dev/email-preview'
 import { Route as ApiPublicApplyRouteImport } from './routes/api/public/apply'
 import { Route as ApiPublicTrackRouteImport } from './routes/api/public/track'
 import { Route as VSlugReservarRouteImport } from './routes/v.$slug_.reservar'
@@ -34,7 +35,6 @@ import { Route as AuthenticatedViajesTripIdMetricasRouteImport } from './routes/
 import { Route as AuthenticatedViajesTripIdPaginaRouteImport } from './routes/_authenticated/viajes.$tripId_.pagina'
 import { Route as AuthenticatedViajesTripIdSolicitudesRouteImport } from './routes/_authenticated/viajes.$tripId_.solicitudes'
 import { Route as ApiPublicPageImageSplatRouteImport } from './routes/api/public/page-image.$'
-import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
 import { Route as AuthenticatedViajesTripIdNotasNoteIdRouteImport } from './routes/_authenticated/viajes.$tripId_.notas.$noteId'
 import { Route as AuthenticatedViajesTripIdTodosTodoIdRouteImport } from './routes/_authenticated/viajes.$tripId_.todos.$todoId'
 
@@ -130,6 +130,11 @@ const AuthenticatedViajesTripIdRoute =
     path: '/viajes/$tripId',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const ApiDevEmailPreviewRoute = ApiDevEmailPreviewRouteImport.update({
+  id: '/api/dev/email-preview',
+  path: '/api/dev/email-preview',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicApplyRoute = ApiPublicApplyRouteImport.update({
   id: '/api/public/apply',
   path: '/api/public/apply',
@@ -168,12 +173,6 @@ const ApiPublicPageImageSplatRoute = ApiPublicPageImageSplatRouteImport.update({
   path: '/api/public/page-image/$',
   getParentRoute: () => rootRouteImport,
 } as any)
-const LovableEmailTransactionalPreviewRoute =
-  LovableEmailTransactionalPreviewRouteImport.update({
-    id: '/lovable/email/transactional/preview',
-    path: '/lovable/email/transactional/preview',
-    getParentRoute: () => rootRouteImport,
-  } as any)
 const AuthenticatedViajesTripIdNotasNoteIdRoute =
   AuthenticatedViajesTripIdNotasNoteIdRouteImport.update({
     id: '/viajes/$tripId_/notas/$noteId',
@@ -205,6 +204,7 @@ export interface FileRoutesByFullPath {
   '/invitacion/$token': typeof InvitacionTokenRoute
   '/v/$slug': typeof VSlugRoute
   '/viajes/$tripId': typeof AuthenticatedViajesTripIdRoute
+  '/api/dev/email-preview': typeof ApiDevEmailPreviewRoute
   '/api/public/apply': typeof ApiPublicApplyRoute
   '/api/public/track': typeof ApiPublicTrackRoute
   '/v/$slug/reservar': typeof VSlugReservarRoute
@@ -212,7 +212,6 @@ export interface FileRoutesByFullPath {
   '/viajes/$tripId/pagina': typeof AuthenticatedViajesTripIdPaginaRoute
   '/viajes/$tripId/solicitudes': typeof AuthenticatedViajesTripIdSolicitudesRoute
   '/api/public/page-image/$': typeof ApiPublicPageImageSplatRoute
-  '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/viajes/$tripId/notas/$noteId': typeof AuthenticatedViajesTripIdNotasNoteIdRoute
   '/viajes/$tripId/todos/$todoId': typeof AuthenticatedViajesTripIdTodosTodoIdRoute
 }
@@ -234,6 +233,7 @@ export interface FileRoutesByTo {
   '/v/$slug': typeof VSlugRoute
   '/': typeof AuthenticatedIndexRoute
   '/viajes/$tripId': typeof AuthenticatedViajesTripIdRoute
+  '/api/dev/email-preview': typeof ApiDevEmailPreviewRoute
   '/api/public/apply': typeof ApiPublicApplyRoute
   '/api/public/track': typeof ApiPublicTrackRoute
   '/v/$slug/reservar': typeof VSlugReservarRoute
@@ -241,7 +241,6 @@ export interface FileRoutesByTo {
   '/viajes/$tripId/pagina': typeof AuthenticatedViajesTripIdPaginaRoute
   '/viajes/$tripId/solicitudes': typeof AuthenticatedViajesTripIdSolicitudesRoute
   '/api/public/page-image/$': typeof ApiPublicPageImageSplatRoute
-  '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/viajes/$tripId/notas/$noteId': typeof AuthenticatedViajesTripIdNotasNoteIdRoute
   '/viajes/$tripId/todos/$todoId': typeof AuthenticatedViajesTripIdTodosTodoIdRoute
 }
@@ -265,6 +264,7 @@ export interface FileRoutesById {
   '/v/$slug': typeof VSlugRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/viajes/$tripId': typeof AuthenticatedViajesTripIdRoute
+  '/api/dev/email-preview': typeof ApiDevEmailPreviewRoute
   '/api/public/apply': typeof ApiPublicApplyRoute
   '/api/public/track': typeof ApiPublicTrackRoute
   '/v/$slug_/reservar': typeof VSlugReservarRoute
@@ -272,7 +272,6 @@ export interface FileRoutesById {
   '/_authenticated/viajes/$tripId_/pagina': typeof AuthenticatedViajesTripIdPaginaRoute
   '/_authenticated/viajes/$tripId_/solicitudes': typeof AuthenticatedViajesTripIdSolicitudesRoute
   '/api/public/page-image/$': typeof ApiPublicPageImageSplatRoute
-  '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/_authenticated/viajes/$tripId_/notas/$noteId': typeof AuthenticatedViajesTripIdNotasNoteIdRoute
   '/_authenticated/viajes/$tripId_/todos/$todoId': typeof AuthenticatedViajesTripIdTodosTodoIdRoute
 }
@@ -296,6 +295,7 @@ export interface FileRouteTypes {
     | '/invitacion/$token'
     | '/v/$slug'
     | '/viajes/$tripId'
+    | '/api/dev/email-preview'
     | '/api/public/apply'
     | '/api/public/track'
     | '/v/$slug/reservar'
@@ -303,7 +303,6 @@ export interface FileRouteTypes {
     | '/viajes/$tripId/pagina'
     | '/viajes/$tripId/solicitudes'
     | '/api/public/page-image/$'
-    | '/lovable/email/transactional/preview'
     | '/viajes/$tripId/notas/$noteId'
     | '/viajes/$tripId/todos/$todoId'
   fileRoutesByTo: FileRoutesByTo
@@ -325,6 +324,7 @@ export interface FileRouteTypes {
     | '/v/$slug'
     | '/'
     | '/viajes/$tripId'
+    | '/api/dev/email-preview'
     | '/api/public/apply'
     | '/api/public/track'
     | '/v/$slug/reservar'
@@ -332,7 +332,6 @@ export interface FileRouteTypes {
     | '/viajes/$tripId/pagina'
     | '/viajes/$tripId/solicitudes'
     | '/api/public/page-image/$'
-    | '/lovable/email/transactional/preview'
     | '/viajes/$tripId/notas/$noteId'
     | '/viajes/$tripId/todos/$todoId'
   id:
@@ -355,6 +354,7 @@ export interface FileRouteTypes {
     | '/v/$slug'
     | '/_authenticated/'
     | '/_authenticated/viajes/$tripId'
+    | '/api/dev/email-preview'
     | '/api/public/apply'
     | '/api/public/track'
     | '/v/$slug_/reservar'
@@ -362,7 +362,6 @@ export interface FileRouteTypes {
     | '/_authenticated/viajes/$tripId_/pagina'
     | '/_authenticated/viajes/$tripId_/solicitudes'
     | '/api/public/page-image/$'
-    | '/lovable/email/transactional/preview'
     | '/_authenticated/viajes/$tripId_/notas/$noteId'
     | '/_authenticated/viajes/$tripId_/todos/$todoId'
   fileRoutesById: FileRoutesById
@@ -374,11 +373,11 @@ export interface RootRouteChildren {
   ResetPasswordRoute: typeof ResetPasswordRoute
   InvitacionTokenRoute: typeof InvitacionTokenRoute
   VSlugRoute: typeof VSlugRoute
+  ApiDevEmailPreviewRoute: typeof ApiDevEmailPreviewRoute
   ApiPublicApplyRoute: typeof ApiPublicApplyRoute
   ApiPublicTrackRoute: typeof ApiPublicTrackRoute
   VSlugReservarRoute: typeof VSlugReservarRoute
   ApiPublicPageImageSplatRoute: typeof ApiPublicPageImageSplatRoute
-  LovableEmailTransactionalPreviewRoute: typeof LovableEmailTransactionalPreviewRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -509,6 +508,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedViajesTripIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/dev/email-preview': {
+      id: '/api/dev/email-preview'
+      path: '/api/dev/email-preview'
+      fullPath: '/api/dev/email-preview'
+      preLoaderRoute: typeof ApiDevEmailPreviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/apply': {
       id: '/api/public/apply'
       path: '/api/public/apply'
@@ -556,13 +562,6 @@ declare module '@tanstack/react-router' {
       path: '/api/public/page-image/$'
       fullPath: '/api/public/page-image/$'
       preLoaderRoute: typeof ApiPublicPageImageSplatRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/lovable/email/transactional/preview': {
-      id: '/lovable/email/transactional/preview'
-      path: '/lovable/email/transactional/preview'
-      fullPath: '/lovable/email/transactional/preview'
-      preLoaderRoute: typeof LovableEmailTransactionalPreviewRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/viajes/$tripId_/notas/$noteId': {
@@ -636,11 +635,11 @@ const rootRouteChildren: RootRouteChildren = {
   ResetPasswordRoute: ResetPasswordRoute,
   InvitacionTokenRoute: InvitacionTokenRoute,
   VSlugRoute: VSlugRoute,
+  ApiDevEmailPreviewRoute: ApiDevEmailPreviewRoute,
   ApiPublicApplyRoute: ApiPublicApplyRoute,
   ApiPublicTrackRoute: ApiPublicTrackRoute,
   VSlugReservarRoute: VSlugReservarRoute,
   ApiPublicPageImageSplatRoute: ApiPublicPageImageSplatRoute,
-  LovableEmailTransactionalPreviewRoute: LovableEmailTransactionalPreviewRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

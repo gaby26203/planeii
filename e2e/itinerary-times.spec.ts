@@ -3,14 +3,14 @@ import { expect, test, type Page } from "@playwright/test";
 const tripId = process.env.E2E_TRIP_ID ?? "9fb966cd-2344-4caa-8c97-254a7635d017";
 
 async function authenticate(page: Page) {
-  const storageKey = process.env.LOVABLE_BROWSER_SUPABASE_STORAGE_KEY;
-  const session = process.env.LOVABLE_BROWSER_SUPABASE_SESSION_JSON;
+  const storageKey = process.env.E2E_SUPABASE_STORAGE_KEY;
+  const session = process.env.E2E_SUPABASE_SESSION_JSON;
   const email = process.env.E2E_EMAIL;
   const password = process.env.E2E_PASSWORD;
 
   await page.goto("/", { waitUntil: "domcontentloaded" });
 
-  // 1) Preferir sesión inyectada por Lovable.
+  // 1) Preferir una sesión de Supabase inyectada (clave de localStorage + JSON de sesión).
   if (storageKey && session) {
     await page.evaluate(({ key, value }) => localStorage.setItem(key, value), {
       key: storageKey,
@@ -24,7 +24,7 @@ async function authenticate(page: Page) {
   if (!email || !password) {
     throw new Error(
       "E2E requiere sesión: definí E2E_EMAIL y E2E_PASSWORD, " +
-        "o inyectá LOVABLE_BROWSER_SUPABASE_STORAGE_KEY + LOVABLE_BROWSER_SUPABASE_SESSION_JSON.",
+        "o inyectá E2E_SUPABASE_STORAGE_KEY + E2E_SUPABASE_SESSION_JSON.",
     );
   }
 
@@ -33,7 +33,7 @@ async function authenticate(page: Page) {
   await page.locator("#password").fill(password);
   await Promise.all([
     page.waitForURL((url) => !url.pathname.startsWith("/auth"), { timeout: 15_000 }),
-    page.getByRole("button", { name: /iniciar sesión|entrar|sign in/i }).click(),
+    page.getByRole("button", { name: /^ingresar$/i }).click(),
   ]);
   await page.goto(`/viajes/${tripId}`, { waitUntil: "domcontentloaded" });
 }
