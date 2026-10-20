@@ -11,6 +11,7 @@ con Supabase como base de datos, autenticación y archivos.
 
 | Documento | Contenido |
 |---|---|
+| [docs/evaluacion-plataforma.md](docs/evaluacion-plataforma.md) | Si vale la pena salir de Lovable y plan para convertir PlanEII en plataforma |
 | [docs/estado.md](docs/estado.md) | Estado del repo: checks, seguridad, bugs, deuda técnica |
 | [docs/stack.md](docs/stack.md) | Tecnologías, versiones, scripts y variables de entorno |
 | [docs/secciones.md](docs/secciones.md) | Secciones de la app, pestañas del viaje y de la landing |

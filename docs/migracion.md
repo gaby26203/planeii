@@ -66,11 +66,39 @@ En el panel de Supabase, sección Authentication:
 ### 3. Datos
 
 Los usuarios, viajes y archivos actuales están en el proyecto Supabase gestionado por Lovable
-Cloud. Hay dos caminos; el primero es el único que conserva contraseñas e ids.
+Cloud.
 
-**A. Copia directa de la base (recomendado).** La configuración anterior de Drizzle leía una
-cadena de conexión `LOVABLE_DB_MIGRATION_URL`, así que Lovable tiene acceso directo a Postgres.
-Si podés obtener esa cadena (o una exportación) desde Lovable o su soporte:
+**A. Exportación oficial de Lovable (recomendado).** Según guías publicadas en 2026, Lovable
+ofrece en Cloud → Overview → Advanced settings la opción "Export project data". Genera un volcado
+de la base con esquema, filas, políticas RLS, funciones, triggers y usuarios de Auth. No incluye
+archivos de Storage, secretos ni la configuración de proveedores de login. Las guías mencionan un
+límite de 5 GB y una exportación por día. Fuentes:
+[carolmonroe.com](https://carolmonroe.com/blog/lovable-cloud-migration),
+[lovable2live.com](https://lovable2live.com/cloud-to-supabase/),
+[CarolMonroe22/lovable-cloud-to-supabase-migration](https://github.com/CarolMonroe22/lovable-cloud-to-supabase-migration).
+Verificalo en la documentación de Lovable antes de planificar.
+
+Como ese volcado refleja el estado real de la base, incluido lo que se hizo fuera de los archivos
+de migración, conviene restaurarlo completo en el proyecto nuevo en lugar de correr las
+migraciones desde cero:
+
+```bash
+psql "$DESTINO" -f volcado-lovable.sql
+# La migración nueva es idempotente: crea solo lo que falte
+psql "$DESTINO" -f supabase/migrations/20261015120000_self_hosting_storage_and_grants.sql
+# Marcá todas las migraciones como aplicadas para que `supabase db push` no las repita
+for f in supabase/migrations/*.sql; do
+  bunx supabase migration repair --status applied "$(basename "$f" | cut -d_ -f1)"
+done
+bun run db:types && git diff src/integrations/supabase/types.ts   # debería no cambiar nada
+```
+
+Las fuentes no coinciden en si las contraseñas sobreviven a la exportación. Planificá con la
+posibilidad de que cada persona tenga que restablecer su contraseña después del corte; quien entra
+con Google no se ve afectada.
+
+**B. Copia directa con `pg_dump`.** Si Lovable o su soporte te dan una cadena de conexión a
+Postgres, podés volcar solo los datos sobre un proyecto con las migraciones ya aplicadas:
 
 ```bash
 # Datos de la app, sin esquema (el esquema ya lo crearon las migraciones)
@@ -90,7 +118,7 @@ Notas para esa carga:
 - `trip_applications.duplicate_of` apunta a la misma tabla; si falla, cargá en dos pasadas.
 - Revisá los privilegios por defecto del proyecto nuevo contra los del original.
 
-**B. Sin acceso directo.** Sin las contraseñas, cada persona tendría que registrarse de nuevo y
+**C. Sin exportación.** Sin las contraseñas, cada persona tendría que registrarse de nuevo y
 los ids de usuario cambiarían. Habría que reasignar `trips.owner_id`, `trip_members.user_id`,
 las rutas de Storage que llevan el uid y demás referencias. Este camino necesita un script de
 reasignación que no está incluido.
