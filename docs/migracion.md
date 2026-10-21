@@ -33,8 +33,8 @@ Mientras dure la transición, no sigas editando en Lovable: regenera archivos ma
 
 ### 1. Proyecto Supabase
 
-1. Creá un proyecto en https://supabase.com.
-2. Vinculalo y aplicá las migraciones:
+1. Crea un proyecto en https://supabase.com.
+2. Vincúlalo y aplica las migraciones:
 
    ```bash
    bunx supabase login
@@ -42,7 +42,7 @@ Mientras dure la transición, no sigas editando en Lovable: regenera archivos ma
    bun run db:push
    ```
 
-3. Regenerá los tipos para confirmar que no hay diferencias:
+3. Regenera los tipos para confirmar que no hay diferencias:
 
    ```bash
    bun run db:types
@@ -57,10 +57,10 @@ En el panel de Supabase, sección Authentication:
    `https://<dominio>/auth**`, `https://<dominio>/reset-password` y `http://localhost:8080/**`.
    Si una URL falta, Supabase vuelve al Site URL y se pierde el parámetro `?invite`.
 2. **Confirmación de email activa.** La aceptación de invitaciones confía en el email del JWT.
-3. **Google.** En Google Cloud creá un OAuth Client de tipo Web con redirect
-   `https://<ref>.supabase.co/auth/v1/callback`. Cargá el client ID y el secret en
+3. **Google.** En Google Cloud crea un OAuth Client de tipo Web con redirect
+   `https://<ref>.supabase.co/auth/v1/callback`. Carga el client ID y el secret en
    Providers → Google.
-4. **SMTP propio.** El SMTP por defecto de Supabase tiene un límite muy bajo. Configurá el SMTP
+4. **SMTP propio.** El SMTP por defecto de Supabase tiene un límite muy bajo. Configura el SMTP
    de Resend para los correos de confirmación y recuperación.
 
 ### 3. Datos
@@ -76,7 +76,7 @@ límite de 5 GB y una exportación por día. Fuentes:
 [carolmonroe.com](https://carolmonroe.com/blog/lovable-cloud-migration),
 [lovable2live.com](https://lovable2live.com/cloud-to-supabase/),
 [CarolMonroe22/lovable-cloud-to-supabase-migration](https://github.com/CarolMonroe22/lovable-cloud-to-supabase-migration).
-Verificalo en la documentación de Lovable antes de planificar.
+Verifícalo en la documentación de Lovable antes de planificar.
 
 Como ese volcado refleja el estado real de la base, incluido lo que se hizo fuera de los archivos
 de migración, conviene restaurarlo completo en el proyecto nuevo en lugar de correr las
@@ -86,19 +86,19 @@ migraciones desde cero:
 psql "$DESTINO" -f volcado-lovable.sql
 # La migración nueva es idempotente: crea solo lo que falte
 psql "$DESTINO" -f supabase/migrations/20261015120000_self_hosting_storage_and_grants.sql
-# Marcá todas las migraciones como aplicadas para que `supabase db push` no las repita
+# Marca todas las migraciones como aplicadas para que `supabase db push` no las repita
 for f in supabase/migrations/*.sql; do
   bunx supabase migration repair --status applied "$(basename "$f" | cut -d_ -f1)"
 done
 bun run db:types && git diff src/integrations/supabase/types.ts   # debería no cambiar nada
 ```
 
-Las fuentes no coinciden en si las contraseñas sobreviven a la exportación. Planificá con la
+Las fuentes no coinciden en si las contraseñas sobreviven a la exportación. Planifica con la
 posibilidad de que cada persona tenga que restablecer su contraseña después del corte; quien entra
 con Google no se ve afectada.
 
 **B. Copia directa con `pg_dump`.** Si Lovable o su soporte te dan una cadena de conexión a
-Postgres, podés volcar solo los datos sobre un proyecto con las migraciones ya aplicadas:
+Postgres, puedes volcar solo los datos sobre un proyecto con las migraciones ya aplicadas:
 
 ```bash
 # Datos de la app, sin esquema (el esquema ya lo crearon las migraciones)
@@ -114,9 +114,9 @@ psql "$DESTINO" -f public.sql
 Notas para esa carga:
 
 - Si la versión de Supabase Auth difiere entre proyectos, `auth.identities` puede tener columnas
-  distintas; en ese caso volcá con `--column-inserts` y ajustá las columnas.
-- `trip_applications.duplicate_of` apunta a la misma tabla; si falla, cargá en dos pasadas.
-- Revisá los privilegios por defecto del proyecto nuevo contra los del original.
+  distintas; en ese caso vuelca con `--column-inserts` y ajusta las columnas.
+- `trip_applications.duplicate_of` apunta a la misma tabla; si falla, carga en dos pasadas.
+- Revisa los privilegios por defecto del proyecto nuevo contra los del original.
 
 **C. Sin exportación.** Sin las contraseñas, cada persona tendría que registrarse de nuevo y
 los ids de usuario cambiarían. Habría que reasignar `trips.owner_id`, `trip_members.user_id`,
@@ -127,7 +127,7 @@ reasignación que no está incluido.
 rutas, porque llevan dentro el uid y el id del viaje. Con la clave de service role de ambos
 proyectos se puede hacer con la API de Storage (listar, descargar, subir).
 
-**Primer owner.** Si arrancás sin datos, registrate en la app y ejecutá
+**Primer owner.** Si arrancas sin datos, regístrate en la app y ejecuta
 `supabase/snippets/grant-owner.sql` con tu email en el SQL editor. Sin esa fila nadie puede
 crear viajes.
 
@@ -140,23 +140,23 @@ bun run assets:download
 git add public/template-assets && git commit -m "Agregar fotos de la plantilla de Oaxaca"
 ```
 
-Si la app ya no está publicada, copiá las ocho fotos a mano en `public/template-assets/` con los
+Si la app ya no está publicada, copia las ocho fotos a mano en `public/template-assets/` con los
 nombres de `scripts/lovable-assets/*.asset.json`.
 
 ### 5. Correo con Resend
 
-1. Verificá el dominio en Resend (SPF y DKIM). Antes, `notify.chamaviaja.com` estaba delegado a
-   los nameservers de Lovable: quitá esa delegación.
-2. Definí `RESEND_API_KEY` y `EMAIL_FROM`, por ejemplo `PLANEI OS <noreply@chamaviaja.com>`.
-3. Revisá las plantillas en `http://localhost:8080/api/dev/email-preview`.
+1. Verifica el dominio en Resend (SPF y DKIM). Antes, `notify.chamaviaja.com` estaba delegado a
+   los nameservers de Lovable: quita esa delegación.
+2. Define `RESEND_API_KEY` y `EMAIL_FROM`, por ejemplo `PLANEI OS <noreply@chamaviaja.com>`.
+3. Revisa las plantillas en `http://localhost:8080/api/dev/email-preview`.
 
 Lovable gestionaba una lista de supresión y el enlace de baja. Resend tiene su propia lista de
 supresión; el enlace de baja no se agrega solo.
 
 ### 6. IA
 
-Definí `AI_API_KEY` y `AI_MODEL`. Con OpenAI directo, `AI_BASE_URL` queda vacío. El código usa la
-Responses API con opciones de razonamiento propias de OpenAI; con otro proveedor, confirmá que
+Define `AI_API_KEY` y `AI_MODEL`. Con OpenAI directo, `AI_BASE_URL` queda vacío. El código usa la
+Responses API con opciones de razonamiento propias de OpenAI; con otro proveedor, confirma que
 soporte la Responses API y la salida con JSON schema.
 
 ### 7. Cloudflare Workers
@@ -174,7 +174,7 @@ bun run deploy
 Variables de servidor que también tiene que tener el Worker: `SUPABASE_URL`,
 `SUPABASE_PUBLISHABLE_KEY`, `EMAIL_FROM`, `AI_MODEL` y, si aplica, `AI_BASE_URL` y
 `EMAIL_REPLY_TO`. Se pueden cargar como vars en el panel de Cloudflare o en `wrangler.jsonc`.
-Después asigná el dominio propio al Worker.
+Después asigna el dominio propio al Worker.
 
 ### 8. Comprobación final
 
@@ -193,6 +193,6 @@ Después asigná el dominio propio al Worker.
 
 ### 9. Corte
 
-1. Apuntá el dominio al Worker nuevo.
-2. Despublicá la app en Lovable para que nadie siga escribiendo en la base vieja.
-3. Si hubo actividad entre la copia de datos y el corte, repetí la copia de datos antes de abrir.
+1. Apunta el dominio al Worker nuevo.
+2. Despublica la app en Lovable para que nadie siga escribiendo en la base vieja.
+3. Si hubo actividad entre la copia de datos y el corte, repite la copia de datos antes de abrir.

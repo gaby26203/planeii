@@ -1,7 +1,7 @@
 # Flujos implementados
 
 Cada flujo describe lo que hace el código hoy, no lo que debería hacer. Los problemas conocidos
-de cada flujo están en [estado.md](estado.md). Si cambiás un flujo, actualizá su diagrama en el
+de cada flujo están en [estado.md](estado.md). Si cambias un flujo, actualiza su diagrama en el
 mismo commit.
 
 Participantes habituales: **UI** (componente React), **Store** (Zustand, `src/lib/trips-store.ts`),

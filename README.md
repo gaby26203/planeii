@@ -28,12 +28,12 @@ Requisitos: [Bun](https://bun.sh) 1.4 o superior y un proyecto Supabase (remoto 
 
 ```bash
 bun install
-cp .env.example .env          # completá las credenciales de Supabase
+cp .env.example .env          # completa las credenciales de Supabase
 bun run db:push               # aplica las migraciones al proyecto vinculado
 bun run dev                   # http://localhost:8080
 ```
 
-El primer usuario necesita el rol owner para crear viajes: registrate y ejecutá
+El primer usuario necesita el rol owner para crear viajes: regístrate y ejecuta
 `supabase/snippets/grant-owner.sql` con tu email.
 
 ## Comprobaciones

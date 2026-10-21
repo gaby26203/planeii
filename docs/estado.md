@@ -135,6 +135,9 @@ Ordenado por gravedad.
   formulario público, analítica, correos ni permisos.
 - **Código muerto.** `ItineraryTab`, `AutoResizeTextarea`, `seedEnrollee`, `addTripMember`,
   `PracticalInfo`, varios imports sin uso.
+- **Textos en voseo.** Lovable escribió la interfaz en español rioplatense ("tenés", "Revisá",
+  "Elegí", "¿Sos nueva?"): unas 170 formas en unos 45 archivos de `src/`. El público es
+  venezolano, así que hay que pasarlas a español neutro con tú.
 
 ## Lo que no se pudo verificar
 

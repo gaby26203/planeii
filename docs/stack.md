@@ -63,7 +63,7 @@ Versiones instaladas según `bun.lock` a octubre de 2026.
 | `bun run db:types` | Regenera `src/integrations/supabase/types.ts` |
 
 Si tu máquina no tiene IPv6, el servidor de desarrollo falla al escuchar en `::`. En ese caso
-usá `bun run dev -- --host 127.0.0.1`.
+usa `bun run dev -- --host 127.0.0.1`.
 
 ## Variables de entorno
 

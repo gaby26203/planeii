@@ -81,7 +81,7 @@ que restablecerla. Fuentes en [migracion.md](migracion.md).
 
 ### Costos mensuales aproximados
 
-Precios de guías de terceros de 2026; verificalos en las páginas oficiales antes de presupuestar.
+Precios de guías de terceros de 2026; verifícalos en las páginas oficiales antes de presupuestar.
 
 | Servicio | Plan | Costo de referencia |
 |---|---|---|
@@ -150,7 +150,8 @@ Ordenado por lo que bloquea primero.
 10. **El producto es de viajes, no de eventos en general.** Itinerario por días, vuelos, seguro,
     monedas por destino y tipo de cambio son propios de viajes. Retiros o talleres encajan casi
     igual; eventos con entradas o asientos serían otro producto.
-11. **Idioma y moneda fijos.** Textos en español rioplatense sin sistema de traducción, 9 monedas
+11. **Idioma y moneda fijos.** Textos en español rioplatense con voseo, cuando el público es
+    venezolano y debería ser español neutro con tú; no hay sistema de traducción. Además, 9 monedas
     en una lista fija y unos 164 montos formateados siempre como USD.
 
 ## 4. Arquitectura objetivo

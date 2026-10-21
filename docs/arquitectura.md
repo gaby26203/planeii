@@ -1,11 +1,11 @@
 # Arquitectura de Planeii
 
-Grafo vivo de la arquitectura. Si cambiás un módulo, una tabla o un límite entre capas,
-actualizá el diagrama correspondiente en el mismo commit. Los flujos paso a paso están en
+Grafo vivo de la arquitectura. Si cambias un módulo, una tabla o un límite entre capas,
+actualiza el diagrama correspondiente en el mismo commit. Los flujos paso a paso están en
 [flujos.md](flujos.md).
 
 Los diagramas son Mermaid: GitHub los dibuja directamente. Para editarlos con vista previa
-podés usar https://mermaid.live.
+puedes usar https://mermaid.live.
 
 ## 1. Contexto del sistema
 
