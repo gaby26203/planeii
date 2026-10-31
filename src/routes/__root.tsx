@@ -15,6 +15,8 @@ import { AccessProvider } from "@/lib/access";
 import { Toaster } from "@/components/ui/sonner";
 // (useTripsStore ya no se hidrata desde el root — ver `_authenticated/route.tsx`)
 import { supabase } from "@/integrations/supabase/client";
+import { BRAND_OG_IMAGE } from "@/lib/brand-photos";
+import { absoluteSiteUrl } from "@/lib/site-url";
 
 function NotFoundComponent() {
   return (
@@ -38,6 +40,8 @@ function NotFoundComponent() {
   );
 }
 
+const OG_IMAGE = absoluteSiteUrl(BRAND_OG_IMAGE);
+
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
   head: () => ({
     meta: [
@@ -60,6 +64,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       { name: "twitter:card", content: "summary_large_image" },
       { property: "og:type", content: "website" },
+      ...(OG_IMAGE
+        ? [
+            { property: "og:image", content: OG_IMAGE },
+            { name: "twitter:image", content: OG_IMAGE },
+          ]
+        : []),
     ],
     links: [
       { rel: "stylesheet", href: appCss },

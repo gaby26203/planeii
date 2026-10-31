@@ -32,6 +32,7 @@ import { NewTripDialog } from "@/components/NewTripDialog";
 import { DeleteTripDialog, DuplicateTripDialog } from "@/components/TripActionsDialogs";
 import { usePermissions } from "@/lib/access";
 import { useTripCoverUrl } from "@/hooks/use-trip-cover-url";
+import { brandPhoto } from "@/lib/brand-photos";
 import { InlineEditableTitle } from "@/components/trip-notes/InlineEditableTitle";
 import { useNewApplicationsCount, useTripPageSlug } from "@/lib/application-alerts";
 
@@ -39,12 +40,15 @@ import { useNewApplicationsCount, useTripPageSlug } from "@/lib/application-aler
 
 
 
+
+const EMPTY_PHOTO = brandPhoto("vicunas");
+
 export const Route = createFileRoute("/_authenticated/")({
   head: () => ({ meta: [
     { title: "Mis viajes · Planeii" },
-    { name: "description", content: "Organizá tus viajes grupales, sus viajeras y su rentabilidad en Planeii." },
+    { name: "description", content: "Organiza tus viajes grupales, sus viajeras y su rentabilidad en Planeii." },
     { property: "og:title", content: "Mis viajes · Planeii" },
-    { property: "og:description", content: "Gestioná tus viajes grupales y su operación en Planeii." },
+    { property: "og:description", content: "Gestiona tus viajes grupales y su operación en Planeii." },
     { property: "og:type", content: "website" },
     { name: "twitter:card", content: "summary" },
   ] }),
@@ -392,19 +396,25 @@ function TripsPage() {
       )}
 
       {hydrated && cards.length === 0 && (
-        <Card className="border-dashed border-2 border-border/60">
+        <Card className="border-dashed border-2 border-border/60 overflow-hidden">
+          <img
+            src={EMPTY_PHOTO.src}
+            alt={EMPTY_PHOTO.alt}
+            className="h-40 w-full object-cover sm:h-52"
+            style={{ objectPosition: EMPTY_PHOTO.position }}
+          />
           <CardContent className="p-10 flex flex-col items-center text-center gap-3">
             <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
               <Sparkles className="h-6 w-6 text-primary" />
             </div>
             <div>
               <h3 className="font-display text-lg font-semibold">
-                {canCreateTrip ? "Creá tu primer viaje" : "Todavía no tenés viajes asignados"}
+                {canCreateTrip ? "Crea tu primer viaje" : "Todavía no tienes viajes asignados"}
               </h3>
               <p className="text-sm text-muted-foreground mt-1 max-w-md">
                 {canCreateTrip
-                  ? "Empezá con los datos básicos y sumá costos, itinerario y viajeras a medida que planificás."
-                  : "Tu cuenta está activa. Si abriste un enlace de invitación y no ves el viaje, verificá que hayas entrado con el mismo correo al que te la enviaron, o volvé a abrir el enlace."}
+                  ? "Empieza con los datos básicos y suma costos, itinerario y viajeras a medida que planificas."
+                  : "Tu cuenta está activa. Si abriste un enlace de invitación y no ves el viaje, verifica que hayas entrado con el mismo correo al que te la enviaron, o vuelve a abrir el enlace."}
               </p>
             </div>
             {canCreateTrip && <NewTripDialog />}

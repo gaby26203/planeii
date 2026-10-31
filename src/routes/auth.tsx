@@ -1,11 +1,12 @@
-import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Compass, Mail, Lock, Loader2 } from "lucide-react";
+import { Mail, Lock, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
+import { AuthShell } from "@/components/AuthShell";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/auth")({
@@ -121,7 +122,7 @@ function AuthPage() {
 
   async function handleReset() {
     if (!email) {
-      toast.error("Ingresá tu email primero");
+      toast.error("Ingresa tu email primero");
       return;
     }
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
@@ -133,138 +134,127 @@ function AuthPage() {
 
   if (awaitingConfirm) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background px-4">
-        <div className="w-full max-w-md">
-          <Card>
-            <CardContent className="p-6 text-center space-y-3">
-              <Mail className="h-8 w-8 mx-auto text-primary" />
-              <h1 className="font-display text-xl font-semibold">Confirmá tu correo</h1>
-              <p className="text-sm text-muted-foreground">
-                Te enviamos un enlace a <b>{email}</b>. Al abrirlo volvés acá
-                {inviteToken ? " y tu acceso al viaje se activa automáticamente." : "."}
-              </p>
-              <p className="text-xs text-muted-foreground">
-                Podés abrir el enlace en cualquier dispositivo: la invitación se conserva.
-              </p>
-              <Button variant="outline" onClick={() => setAwaitingConfirm(false)}>
-                Volver
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
+      <AuthShell photo="rio-tepuyes">
+        <Card>
+          <CardContent className="p-6 text-center space-y-3">
+            <Mail className="h-8 w-8 mx-auto text-primary" />
+            <h1 className="font-display text-xl font-semibold">Confirma tu correo</h1>
+            <p className="text-sm text-muted-foreground">
+              Te enviamos un enlace a <b>{email}</b>. Al abrirlo vuelves aquí
+              {inviteToken ? " y tu acceso al viaje se activa automáticamente." : "."}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Puedes abrir el enlace en cualquier dispositivo: la invitación se conserva.
+            </p>
+            <Button variant="outline" onClick={() => setAwaitingConfirm(false)}>
+              Volver
+            </Button>
+          </CardContent>
+        </Card>
+      </AuthShell>
     );
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background px-4">
-      <div className="w-full max-w-md">
-        <Link to="/" className="flex items-center justify-center gap-2.5 mb-8">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary">
-            <Compass className="h-5 w-5 text-primary-foreground" />
+    <AuthShell photo="rio-tepuyes">
+      <Card>
+        <CardContent className="p-6">
+          <div className="mb-6 text-center">
+            <h1 className="font-display text-xl font-semibold">
+              {mode === "signup" ? "Crear cuenta" : "Ingresar"}
+            </h1>
+            <p className="text-xs text-muted-foreground mt-1">
+              {inviteToken
+                ? "Usa el correo al que te enviaron la invitación: tu acceso al viaje se activa al entrar."
+                : mode === "signup"
+                  ? "Regístrate con el email al que fue enviada la invitación"
+                  : "Acceso restringido al equipo organizador"}
+            </p>
           </div>
-          <span className="font-display text-2xl font-semibold tracking-tight">PLANEI OS</span>
-        </Link>
 
-        <Card>
-          <CardContent className="p-6">
-            <div className="mb-6 text-center">
-              <h1 className="font-display text-xl font-semibold">
-                {mode === "signup" ? "Crear cuenta" : "Ingresar"}
-              </h1>
-              <p className="text-xs text-muted-foreground mt-1">
-                {inviteToken
-                  ? "Usá el correo al que te enviaron la invitación: tu acceso al viaje se activa al entrar."
-                  : mode === "signup"
-                    ? "Registrate con el email al que fue enviada la invitación"
-                    : "Acceso restringido al equipo organizador"}
-              </p>
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full mb-4"
+            onClick={handleGoogle}
+            disabled={loading}
+          >
+            Continuar con Google
+          </Button>
+
+          <div className="relative my-4">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t border-border" />
+            </div>
+            <div className="relative flex justify-center text-xs">
+              <span className="bg-card px-2 text-muted-foreground">o con email</span>
+            </div>
+          </div>
+
+          <form onSubmit={handleEmail} className="space-y-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="email">Email</Label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="pl-9"
+                  required
+                />
+              </div>
             </div>
 
-            <Button
-              type="button"
-              variant="outline"
-              className="w-full mb-4"
-              onClick={handleGoogle}
-              disabled={loading}
-            >
-              Continuar con Google
+            <div className="space-y-1.5">
+              <Label htmlFor="password">Contraseña</Label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="pl-9"
+                  minLength={6}
+                  required
+                />
+              </div>
+            </div>
+
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {mode === "signup" ? "Crear cuenta" : "Ingresar"}
             </Button>
 
-            <div className="relative my-4">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t border-border" />
-              </div>
-              <div className="relative flex justify-center text-xs">
-                <span className="bg-card px-2 text-muted-foreground">o con email</span>
-              </div>
-            </div>
-
-            <form onSubmit={handleEmail} className="space-y-4">
-              <div className="space-y-1.5">
-                <Label htmlFor="email">Email</Label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="email"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="pl-9"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-1.5">
-                <Label htmlFor="password">Contraseña</Label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="password"
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="pl-9"
-                    minLength={6}
-                    required
-                  />
-                </div>
-              </div>
-
-              <Button type="submit" className="w-full" disabled={loading}>
-                {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {mode === "signup" ? "Crear cuenta" : "Ingresar"}
-              </Button>
-
-              <div className="flex items-center justify-between text-xs">
+            <div className="flex items-center justify-between text-xs">
+              <button
+                type="button"
+                onClick={() => setMode(mode === "signup" ? "signin" : "signup")}
+                className="text-muted-foreground hover:text-foreground"
+              >
+                {mode === "signup" ? "¿Ya tienes cuenta? Ingresar" : "¿Eres nueva? Crear cuenta"}
+              </button>
+              {mode === "signin" && (
                 <button
                   type="button"
-                  onClick={() => setMode(mode === "signup" ? "signin" : "signup")}
+                  onClick={handleReset}
                   className="text-muted-foreground hover:text-foreground"
                 >
-                  {mode === "signup" ? "¿Ya tenés cuenta? Ingresar" : "¿Sos nueva? Crear cuenta"}
+                  Olvidé mi contraseña
                 </button>
-                {mode === "signin" && (
-                  <button
-                    type="button"
-                    onClick={handleReset}
-                    className="text-muted-foreground hover:text-foreground"
-                  >
-                    Olvidé mi contraseña
-                  </button>
-                )}
-              </div>
-            </form>
-          </CardContent>
-        </Card>
+              )}
+            </div>
+          </form>
+        </CardContent>
+      </Card>
 
-        <p className="text-xs text-muted-foreground text-center mt-4">
-          {inviteToken
-            ? "Tu invitación ya está guardada: se activa sola en cuanto entres con el correo invitado."
-            : "El acceso a los viajes lo habilita la administradora con una invitación."}
-        </p>
-      </div>
-    </div>
+      <p className="text-xs text-muted-foreground text-center mt-4">
+        {inviteToken
+          ? "Tu invitación ya está guardada: se activa sola en cuanto entres con el correo invitado."
+          : "El acceso a los viajes lo habilita la administradora con una invitación."}
+      </p>
+    </AuthShell>
   );
 }

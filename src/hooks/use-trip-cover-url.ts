@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { isBrandPhoto } from "@/lib/brand-photos";
 import { isExternalUrl, isStoragePath, resolveCoverUrl } from "@/lib/trip-cover-storage";
 
 // Cache en memoria para signed URLs (por path) durante la sesión.
@@ -7,14 +8,14 @@ const CACHE_TTL_MS = 60 * 60 * 1000 * 6; // 6h (menor que el TTL del signed URL)
 
 /**
  * Devuelve la URL final para mostrar el cover de un viaje.
- * - URL externa: la retorna tal cual.
+ * - URL externa o foto de marca: la retorna tal cual.
  * - Path de storage: genera y cachea un signed URL.
  * - null/undefined: retorna null.
  */
 export function useTripCoverUrl(ref: string | null | undefined): string | null {
   const [url, setUrl] = useState<string | null>(() => {
     if (!ref) return null;
-    if (isExternalUrl(ref)) return ref;
+    if (isExternalUrl(ref) || isBrandPhoto(ref)) return ref;
     const cached = cache.get(ref);
     if (cached && cached.expiresAt > Date.now()) return cached.url;
     return null;
@@ -26,7 +27,7 @@ export function useTripCoverUrl(ref: string | null | undefined): string | null {
       setUrl(null);
       return;
     }
-    if (isExternalUrl(ref)) {
+    if (isExternalUrl(ref) || isBrandPhoto(ref)) {
       setUrl(ref);
       return;
     }

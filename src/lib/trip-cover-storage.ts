@@ -1,9 +1,11 @@
 // Helpers para el bucket privado `trip-covers`.
-// - `coverImage` del viaje puede ser una URL externa (http/https) o un path
-//   interno prefijado con `storage:` (ej. `storage:{uid}/{tripId}/1234.jpg`).
+// - `coverImage` del viaje puede ser una URL externa (http/https), una foto de marca
+//   (`/brand/fotos/...`, ver brand-photos.ts) o un path interno prefijado con `storage:`
+//   (ej. `storage:{uid}/{tripId}/1234.jpg`).
 // - Para archivos internos se generan signed URLs on-demand.
 
 import { supabase } from "@/integrations/supabase/client";
+import { isBrandPhoto } from "@/lib/brand-photos";
 
 const BUCKET = "trip-covers";
 const STORAGE_PREFIX = "storage:";
@@ -26,7 +28,7 @@ function pathFromStorageRef(ref: string): string {
 
 export async function uploadTripCover(file: File, tripId: string): Promise<string> {
   if (!ACCEPTED_COVER_TYPES.includes(file.type)) {
-    throw new Error("Formato no soportado. Usá JPG, PNG o WebP.");
+    throw new Error("Formato no soportado. Usa JPG, PNG o WebP.");
   }
   if (file.size > MAX_COVER_BYTES) {
     throw new Error("La imagen supera los 5 MB.");
@@ -58,7 +60,7 @@ export async function deleteTripCoverRef(ref: string | null | undefined): Promis
 /** Resuelve `coverImage` a una URL usable en `<img src>`. */
 export async function resolveCoverUrl(ref: string | null | undefined): Promise<string | null> {
   if (!ref) return null;
-  if (isExternalUrl(ref)) return ref;
+  if (isExternalUrl(ref) || isBrandPhoto(ref)) return ref;
   if (!isStoragePath(ref)) return null;
   const path = pathFromStorageRef(ref);
   const { data, error } = await supabase.storage.from(BUCKET).createSignedUrl(path, SIGNED_URL_TTL);

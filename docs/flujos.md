@@ -184,7 +184,11 @@ sequenceDiagram
   participant S as Store
   participant DB
   opt portada
-    UI->>ST: trip-covers/{uid}/{tripId}/{ts}.ext
+    alt subir archivo
+      UI->>ST: trip-covers/{uid}/{tripId}/{ts}.ext
+    else galería o URL
+      UI->>UI: /brand/fotos/… o https://…, sin storage
+    end
   end
   UI->>SF: getAccountDefaults() (reembolsos, presets de costos)
   UI->>S: createTrip(data) optimista
@@ -197,6 +201,10 @@ sequenceDiagram
 
 Duplicar (`TripActionsDialogs.tsx`) copia el JSON sin viajeras, miembros ni invitaciones y
 reutiliza el mismo flujo.
+
+La portada se elige en `TripCoverPicker`: subir un archivo al bucket `trip-covers`, elegir una
+de las fotos de marca de `src/lib/brand-photos.ts` o pegar una URL. Las fotos de marca y las URL
+se guardan tal cual en `coverImage` y se muestran sin signed URL.
 
 ### 7. Costos e itinerario
 

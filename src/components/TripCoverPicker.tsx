@@ -1,10 +1,11 @@
-// Picker de foto de cover: permite subir un archivo o pegar una URL.
-// Devuelve el `coverImage` final (string interno `storage:...` o URL http/https)
+// Picker de foto de cover: permite subir un archivo, elegir una foto de la galería de
+// PlanEII o pegar una URL. Devuelve el `coverImage` final (string interno `storage:...`,
+// foto de marca `/brand/fotos/...` o URL http/https)
 // vía `onChange`. No persiste — el caller decide dónde guardarlo.
 
 import { useRef, useState } from "react";
 import { toast } from "sonner";
-import { Loader2, Upload, Link as LinkIcon, X, Image as ImageIcon } from "lucide-react";
+import { Loader2, Upload, Link as LinkIcon, X, Image as ImageIcon, Images } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,6 +17,7 @@ import {
   uploadTripCover,
 } from "@/lib/trip-cover-storage";
 import { useTripCoverUrl } from "@/hooks/use-trip-cover-url";
+import { BRAND_PHOTOS } from "@/lib/brand-photos";
 
 interface Props {
   /** Trip ID necesario para el path del storage. */
@@ -70,6 +72,16 @@ export function TripCoverPicker({ tripId, value, onChange, compact = false }: Pr
     toast.success("Foto de portada actualizada");
   }
 
+  function handlePick(src: string) {
+    if (src === value) return;
+    const oldRef = value;
+    onChange(src);
+    if (isStoragePath(oldRef)) {
+      deleteTripCoverRef(oldRef).catch(() => {});
+    }
+    toast.success("Foto de portada actualizada");
+  }
+
   function handleRemove() {
     const oldRef = value;
     onChange(null);
@@ -111,9 +123,12 @@ export function TripCoverPicker({ tripId, value, onChange, compact = false }: Pr
     <div className={compact ? "space-y-2" : "space-y-3"}>
       {preview}
       <Tabs defaultValue="upload">
-        <TabsList className="grid w-full grid-cols-2 h-8">
+        <TabsList className="grid w-full grid-cols-3 h-8">
           <TabsTrigger value="upload" className="text-xs gap-1.5">
             <Upload className="h-3 w-3" /> Subir
+          </TabsTrigger>
+          <TabsTrigger value="gallery" className="text-xs gap-1.5">
+            <Images className="h-3 w-3" /> Galería
           </TabsTrigger>
           <TabsTrigger value="url" className="text-xs gap-1.5">
             <LinkIcon className="h-3 w-3" /> URL
@@ -143,9 +158,34 @@ export function TripCoverPicker({ tripId, value, onChange, compact = false }: Pr
             Elegir archivo (JPG, PNG, WebP · máx 5 MB)
           </Button>
         </TabsContent>
+        <TabsContent value="gallery" className="mt-2">
+          <div className="grid grid-cols-5 gap-1.5">
+            {BRAND_PHOTOS.map((p) => (
+              <button
+                key={p.id}
+                type="button"
+                onClick={() => handlePick(p.src)}
+                aria-pressed={value === p.src}
+                aria-label={p.alt}
+                title={p.alt}
+                className={`relative aspect-square overflow-hidden rounded-md border-2 transition-colors ${
+                  value === p.src ? "border-primary" : "border-transparent hover:border-border"
+                }`}
+              >
+                <img
+                  src={p.thumb}
+                  alt=""
+                  loading="lazy"
+                  className="h-full w-full object-cover"
+                  style={{ objectPosition: p.position }}
+                />
+              </button>
+            ))}
+          </div>
+        </TabsContent>
         <TabsContent value="url" className="mt-2 space-y-2">
           <Label htmlFor={`cover-url-${tripId}`} className="text-xs text-muted-foreground">
-            Pegá una URL pública de imagen
+            Pega una URL pública de imagen
           </Label>
           <div className="flex gap-2">
             <Input

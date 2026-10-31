@@ -136,8 +136,9 @@ Ordenado por gravedad.
 - **Código muerto.** `ItineraryTab`, `AutoResizeTextarea`, `seedEnrollee`, `addTripMember`,
   `PracticalInfo`, varios imports sin uso.
 - **Textos en voseo.** Lovable escribió la interfaz en español rioplatense ("tenés", "Revisá",
-  "Elegí", "¿Sos nueva?"): unas 170 formas en unos 45 archivos de `src/`. El público es
-  venezolano, así que hay que pasarlas a español neutro con tú.
+  "Elegí"): quedan unas 150 formas en unos 39 archivos de `src/`. El público es venezolano, así
+  que hay que pasarlas a español neutro con tú. Las pantallas de acceso, el panel sin viajes y el
+  selector de portada ya están en tú.
 
 ## Lo que no se pudo verificar
 

@@ -1,10 +1,11 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
-import { Compass, Loader2, CheckCircle2, XCircle, Mail } from "lucide-react";
+import { Loader2, CheckCircle2, XCircle, Mail } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { AuthShell } from "@/components/AuthShell";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import {
@@ -100,7 +101,7 @@ function InvitationPage() {
       ) {
         const ok = await acceptNow();
         if (ok) {
-          toast.success("¡Ya tenés acceso al viaje!");
+          toast.success("¡Ya tienes acceso al viaje!");
           navigate({ to: "/viajes/$tripId", params: { tripId: res.tripId }, replace: true });
           return;
         }
@@ -128,103 +129,94 @@ function InvitationPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background px-4">
-      <div className="w-full max-w-md">
-        <div className="flex items-center justify-center gap-2.5 mb-8">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary">
-            <Compass className="h-5 w-5 text-primary-foreground" />
-          </div>
-          <span className="font-display text-2xl font-semibold tracking-tight">PLANEI OS</span>
-        </div>
+    <AuthShell photo="laguna-altiplano">
+      <Card>
+        <CardContent className="p-6">
+          {state.kind === "loading" && (
+            <div className="text-center py-8">
+              <Loader2 className="h-6 w-6 animate-spin mx-auto text-muted-foreground" />
+              <p className="text-sm text-muted-foreground mt-3">Cargando invitación…</p>
+            </div>
+          )}
 
-        <Card>
-          <CardContent className="p-6">
-            {state.kind === "loading" && (
-              <div className="text-center py-8">
-                <Loader2 className="h-6 w-6 animate-spin mx-auto text-muted-foreground" />
-                <p className="text-sm text-muted-foreground mt-3">Cargando invitación…</p>
-              </div>
-            )}
-
-            {state.kind === "unauth" && (
-              <div className="space-y-4">
-                <div className="text-center">
-                  <Mail className="h-8 w-8 mx-auto text-primary" />
-                  <h1 className="font-display text-xl font-semibold mt-3">
-                    Invitación a un viaje
-                  </h1>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Creá tu cuenta o iniciá sesión con el correo al que te enviaron la
-                    invitación. En cuanto entres, el acceso al viaje se activa solo.
-                  </p>
-                </div>
-                <Button className="w-full" onClick={() => goToAuth()}>
-                  Continuar
-                </Button>
-              </div>
-            )}
-
-            {state.kind === "loaded" && !state.data.found && (
-              <div className="text-center py-6 space-y-3">
-                <XCircle className="h-8 w-8 mx-auto text-destructive" />
-                <h1 className="font-display text-lg font-semibold">Invitación no encontrada</h1>
-                <p className="text-xs text-muted-foreground">
-                  El link puede haber sido revocado o es incorrecto.
+          {state.kind === "unauth" && (
+            <div className="space-y-4">
+              <div className="text-center">
+                <Mail className="h-8 w-8 mx-auto text-primary" />
+                <h1 className="font-display text-xl font-semibold mt-3">
+                  Invitación a un viaje
+                </h1>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Crea tu cuenta o inicia sesión con el correo al que te enviaron la
+                  invitación. En cuanto entres, el acceso al viaje se activa solo.
                 </p>
-                <Button variant="outline" onClick={() => navigate({ to: "/" })}>
-                  Ir al inicio
-                </Button>
               </div>
-            )}
+              <Button className="w-full" onClick={() => goToAuth()}>
+                Continuar
+              </Button>
+            </div>
+          )}
 
-            {state.kind === "loaded" && state.data.found && (
-              <InvitationDetails
-                data={state.data}
-                onAccept={handleAccept}
-                onSwitch={() =>
-                  switchAccount(state.data.found ? state.data.email : undefined)
+          {state.kind === "loaded" && !state.data.found && (
+            <div className="text-center py-6 space-y-3">
+              <XCircle className="h-8 w-8 mx-auto text-destructive" />
+              <h1 className="font-display text-lg font-semibold">Invitación no encontrada</h1>
+              <p className="text-xs text-muted-foreground">
+                El link puede haber sido revocado o es incorrecto.
+              </p>
+              <Button variant="outline" onClick={() => navigate({ to: "/" })}>
+                Ir al inicio
+              </Button>
+            </div>
+          )}
+
+          {state.kind === "loaded" && state.data.found && (
+            <InvitationDetails
+              data={state.data}
+              onAccept={handleAccept}
+              onSwitch={() =>
+                switchAccount(state.data.found ? state.data.email : undefined)
+              }
+              onOpenTrip={(tripId) => navigate({ to: "/viajes/$tripId", params: { tripId } })}
+              onCancel={() => navigate({ to: "/" })}
+            />
+          )}
+
+          {state.kind === "accepting" && (
+            <div className="text-center py-8">
+              <Loader2 className="h-6 w-6 animate-spin mx-auto text-muted-foreground" />
+              <p className="text-sm text-muted-foreground mt-3">Activando tu acceso…</p>
+            </div>
+          )}
+
+          {state.kind === "accepted" && (
+            <div className="text-center py-6 space-y-4">
+              <CheckCircle2 className="h-10 w-10 mx-auto text-primary" />
+              <h1 className="font-display text-lg font-semibold">¡Listo!</h1>
+              <p className="text-xs text-muted-foreground">Ya tienes acceso al viaje.</p>
+              <Button
+                className="w-full"
+                onClick={() =>
+                  navigate({ to: "/viajes/$tripId", params: { tripId: state.tripId } })
                 }
-                onOpenTrip={(tripId) => navigate({ to: "/viajes/$tripId", params: { tripId } })}
-                onCancel={() => navigate({ to: "/" })}
-              />
-            )}
+              >
+                Abrir viaje
+              </Button>
+            </div>
+          )}
 
-            {state.kind === "accepting" && (
-              <div className="text-center py-8">
-                <Loader2 className="h-6 w-6 animate-spin mx-auto text-muted-foreground" />
-                <p className="text-sm text-muted-foreground mt-3">Activando tu acceso…</p>
-              </div>
-            )}
-
-            {state.kind === "accepted" && (
-              <div className="text-center py-6 space-y-4">
-                <CheckCircle2 className="h-10 w-10 mx-auto text-primary" />
-                <h1 className="font-display text-lg font-semibold">¡Listo!</h1>
-                <p className="text-xs text-muted-foreground">Ya tenés acceso al viaje.</p>
-                <Button
-                  className="w-full"
-                  onClick={() =>
-                    navigate({ to: "/viajes/$tripId", params: { tripId: state.tripId } })
-                  }
-                >
-                  Abrir viaje
-                </Button>
-              </div>
-            )}
-
-            {state.kind === "error" && (
-              <div className="text-center py-6 space-y-3">
-                <XCircle className="h-8 w-8 mx-auto text-destructive" />
-                <p className="text-sm">{state.message}</p>
-                <Button variant="outline" onClick={() => void bootstrap()}>
-                  Reintentar
-                </Button>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+          {state.kind === "error" && (
+            <div className="text-center py-6 space-y-3">
+              <XCircle className="h-8 w-8 mx-auto text-destructive" />
+              <p className="text-sm">{state.message}</p>
+              <Button variant="outline" onClick={() => void bootstrap()}>
+                Reintentar
+              </Button>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </AuthShell>
   );
 }
 
@@ -247,7 +239,7 @@ function InvitationDetails({
         <CheckCircle2 className="h-8 w-8 mx-auto text-primary" />
         <p className="text-sm">
           {data.isMember
-            ? "Ya tenés acceso a este viaje."
+            ? "Ya tienes acceso a este viaje."
             : "Esta invitación ya fue aceptada por otra cuenta."}
         </p>
         {data.isMember ? (
@@ -264,7 +256,7 @@ function InvitationDetails({
         <XCircle className="h-8 w-8 mx-auto text-destructive" />
         <p className="text-sm">Esta invitación fue cancelada.</p>
         <p className="text-xs text-muted-foreground">
-          Pedile a la administradora que te envíe un enlace nuevo.
+          Pídele a la administradora que te envíe un enlace nuevo.
         </p>
         <Button variant="outline" onClick={onCancel}>Ir al inicio</Button>
       </div>
@@ -276,7 +268,7 @@ function InvitationDetails({
         <XCircle className="h-8 w-8 mx-auto text-destructive" />
         <p className="text-sm">Esta invitación expiró.</p>
         <p className="text-xs text-muted-foreground">
-          Pedile a la administradora que te envíe un enlace nuevo.
+          Pídele a la administradora que te envíe un enlace nuevo.
         </p>
         <Button variant="outline" onClick={onCancel}>Ir al inicio</Button>
       </div>
@@ -324,7 +316,7 @@ function InvitationDetails({
         <div className="space-y-2">
           <p className="text-xs text-destructive text-center">
             Esta invitación es para <b>{data.email}</b> y estás usando{" "}
-            <b>{data.currentEmail ?? "otra cuenta"}</b>. Entrá con{" "}
+            <b>{data.currentEmail ?? "otra cuenta"}</b>. Entra con{" "}
             <b>{data.email}</b> para activar tu acceso.
           </p>
           <Button variant="outline" className="w-full" onClick={onSwitch}>

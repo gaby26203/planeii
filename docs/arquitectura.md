@@ -195,7 +195,7 @@ Además, sin relación declarada:
 - `access_audit_log` registra cambios de acceso (actor, destinatario, viaje). Solo la escribe el
   servidor con service role.
 - `trip_documents.storage_path` apunta a un objeto de `trip-notes-docs`; `trips.data.coverImage`
-  a `trip-covers`; las imágenes dentro de `trip_pages.document` a `trip-page-images`.
+  a `trip-covers`, a una URL externa o a una foto de marca de `public/brand/fotos/`; las imágenes dentro de `trip_pages.document` a `trip-page-images`.
 
 Todas las migraciones están en `supabase/migrations/` y se aplican en orden con
 `supabase db push`. La última, `20261015120000_self_hosting_storage_and_grants.sql`, crea lo que

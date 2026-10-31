@@ -1,11 +1,12 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Compass, Lock, Loader2 } from "lucide-react";
+import { Lock, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
+import { AuthShell } from "@/components/AuthShell";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/reset-password")({
@@ -54,79 +55,70 @@ function ResetPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background px-4">
-      <div className="w-full max-w-md">
-        <Link to="/" className="flex items-center justify-center gap-2.5 mb-8">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary">
-            <Compass className="h-5 w-5 text-primary-foreground" />
+    <AuthShell photo="viajera-cascada">
+      <Card>
+        <CardContent className="p-6">
+          <div className="mb-6 text-center">
+            <h1 className="font-display text-xl font-semibold">Nueva contraseña</h1>
+            <p className="text-xs text-muted-foreground mt-1">
+              {ready
+                ? "Elige una nueva contraseña para tu cuenta"
+                : "Validando link de recuperación..."}
+            </p>
           </div>
-          <span className="font-display text-2xl font-semibold tracking-tight">PLANEI OS</span>
-        </Link>
 
-        <Card>
-          <CardContent className="p-6">
-            <div className="mb-6 text-center">
-              <h1 className="font-display text-xl font-semibold">Nueva contraseña</h1>
-              <p className="text-xs text-muted-foreground mt-1">
-                {ready
-                  ? "Elegí una nueva contraseña para tu cuenta"
-                  : "Validando link de recuperación..."}
-              </p>
-            </div>
-
-            {ready ? (
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="space-y-1.5">
-                  <Label htmlFor="password">Nueva contraseña</Label>
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      id="password"
-                      type="password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      className="pl-9"
-                      minLength={6}
-                      required
-                    />
-                  </div>
+          {ready ? (
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-1.5">
+                <Label htmlFor="password">Nueva contraseña</Label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="pl-9"
+                    minLength={6}
+                    required
+                  />
                 </div>
-
-                <div className="space-y-1.5">
-                  <Label htmlFor="confirm">Confirmar contraseña</Label>
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      id="confirm"
-                      type="password"
-                      value={confirm}
-                      onChange={(e) => setConfirm(e.target.value)}
-                      className="pl-9"
-                      minLength={6}
-                      required
-                    />
-                  </div>
-                </div>
-
-                <Button type="submit" className="w-full" disabled={loading}>
-                  {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Guardar contraseña
-                </Button>
-              </form>
-            ) : (
-              <div className="flex justify-center py-6">
-                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
               </div>
-            )}
 
-            <div className="mt-4 text-center">
-              <Link to="/auth" className="text-xs text-muted-foreground hover:text-foreground">
-                Volver a ingresar
-              </Link>
+              <div className="space-y-1.5">
+                <Label htmlFor="confirm">Confirmar contraseña</Label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="confirm"
+                    type="password"
+                    value={confirm}
+                    onChange={(e) => setConfirm(e.target.value)}
+                    className="pl-9"
+                    minLength={6}
+                    required
+                  />
+                </div>
+              </div>
+
+              <Button type="submit" className="w-full" disabled={loading}>
+                {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Guardar contraseña
+              </Button>
+            </form>
+          ) : (
+            <div className="flex justify-center py-6">
+              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
             </div>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+          )}
+
+          <div className="mt-4 text-center">
+            <Link to="/auth" className="text-xs text-muted-foreground hover:text-foreground">
+              Volver a ingresar
+            </Link>
+          </div>
+        </CardContent>
+      </Card>
+    </AuthShell>
   );
 }
