@@ -460,6 +460,9 @@ sequenceDiagram
   participant A as /api/public/apply
   participant DB
   participant R as Resend
+  opt formulario en modo externo
+    F-->>V: 302 al destino del botón Reservar (o a /v/$slug si no hay enlace)
+  end
   V->>F: completa el formulario
   F->>F: track form_start (primer foco)
   F->>A: POST {slug, datos, answers, consent, utm, referrer}

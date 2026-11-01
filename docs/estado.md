@@ -96,7 +96,6 @@ Las notas de costo, que antes se mostraban sin sanear, pasan por `sanitizeNoteHt
 | Nuevo viaje | El id pre-generado no se regenera al cerrar el diálogo; un segundo viaje sin recargar podría chocar | Leído |
 | Analítica | Los clics de la barra de anuncio nunca se cuentan y "Ver itinerario" cuenta como clic de reserva | Leído |
 | Analítica | "Visitas totales" son solo 30 días con tope de 5.000 filas | Leído |
-| Reservar | `/v/$slug/reservar` muestra el formulario interno aunque el modo sea externo; al enviar responde 409 | Leído |
 | Monedas | Dashboard, Finanzas y viajeras formatean en USD aunque la moneda base sea otra, y el dashboard suma monedas distintas | Leído |
 | Viajeras | Con crédito aplicado, las cuotas se crean por el precio completo | Leído |
 | Itinerario | Título, descripción y actividades del día no se pueden editar, pero las exportaciones los usan | Leído |

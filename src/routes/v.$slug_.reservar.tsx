@@ -1,11 +1,18 @@
-import { createFileRoute, notFound } from "@tanstack/react-router";
-import { fetchPublishedPage } from "@/lib/published-page";
+import { createFileRoute, notFound, redirect } from "@tanstack/react-router";
+import { bookingHrefFor, fetchPublishedPage } from "@/lib/published-page";
 import { ApplyFormView } from "@/components/trip/ApplyFormView";
 
 export const Route = createFileRoute("/v/$slug_/reservar")({
   loader: async ({ params }) => {
     const data = await fetchPublishedPage(params.slug);
     if (!data) throw notFound();
+    // Con el formulario en modo externo esta página no recibe solicitudes (la API responde 409).
+    // Quien llega con un enlace viejo va al mismo destino que el botón Reservar de la landing.
+    if (data.document.bookingForm?.mode !== "internal") {
+      const href = bookingHrefFor(data.document, params.slug);
+      if (/^https?:\/\//i.test(href ?? "")) throw redirect({ href, statusCode: 302 });
+      throw redirect({ to: "/v/$slug", params: { slug: params.slug }, statusCode: 302 });
+    }
     return data;
   },
   head: ({ loaderData }) => {
