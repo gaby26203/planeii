@@ -179,7 +179,8 @@ Después asigna el dominio propio al Worker.
 ### 8. Comprobación final
 
 Una parte de la lista es automática y se corre contra el despliegue, desde tu máquina o desde
-GitHub (Actions → Comprobar despliegue → Run workflow):
+GitHub (Actions → Comprobar despliegue → Run workflow; el botón aparece cuando el workflow está
+en la rama principal):
 
 ```bash
 SMOKE_BASE_URL=https://<dominio> \
