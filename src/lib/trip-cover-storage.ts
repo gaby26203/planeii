@@ -47,6 +47,21 @@ export async function uploadTripCover(file: File, tripId: string): Promise<strin
   return `${STORAGE_PREFIX}${path}`;
 }
 
+/**
+ * Copia una portada del bucket a la carpeta de otro viaje y devuelve la referencia nueva. Así un
+ * viaje duplicado tiene su propio archivo y borrar una portada no rompe la otra.
+ */
+export async function copyTripCover(ref: string, tripId: string): Promise<string> {
+  const from = pathFromStorageRef(ref);
+  const { data: userRes, error: userErr } = await supabase.auth.getUser();
+  if (userErr || !userRes.user) throw new Error("Sesión no válida.");
+  const ext = (from.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "");
+  const to = `${userRes.user.id}/${tripId}/${Date.now()}.${ext || "jpg"}`;
+  const { error } = await supabase.storage.from(BUCKET).copy(from, to);
+  if (error) throw error;
+  return `${STORAGE_PREFIX}${to}`;
+}
+
 export async function deleteTripCoverRef(ref: string | null | undefined): Promise<void> {
   if (!isStoragePath(ref)) return;
   const path = pathFromStorageRef(ref);

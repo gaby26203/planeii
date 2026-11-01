@@ -19,6 +19,7 @@ import {
   replaceTagId,
 } from "./tags";
 import type { TripTag } from "./tags";
+import { copyTripCover, deleteTripCoverRef, isStoragePath } from "./trip-cover-storage";
 
 import type {
   AppliedCredit,
@@ -733,9 +734,23 @@ export const useTripsStore = create<TripsState>()((set, get) => ({
       activities: [...(d.activities ?? [])],
     }));
     const copyDates = opts?.copyDates ?? true;
+    // Una portada del bucket se copia a la carpeta del viaje nuevo: si se compartiera la
+    // referencia, quitarla en uno de los dos viajes borraría el archivo del otro.
+    let coverImage = source.coverImage ?? null;
+    let copiedCover: string | null = null;
+    if (isStoragePath(coverImage)) {
+      try {
+        copiedCover = await copyTripCover(coverImage, newId);
+        coverImage = copiedCover;
+      } catch (e) {
+        console.warn("[trips-store] no se pudo copiar la portada al duplicar", e);
+        coverImage = null;
+      }
+    }
     const clone: TripData = {
       ...source,
       id: newId,
+      coverImage,
       name: `${source.name} (copia)`,
       status: "planificando",
       startDate: copyDates ? source.startDate : null,
@@ -750,7 +765,12 @@ export const useTripsStore = create<TripsState>()((set, get) => ({
       deletedAt: undefined,
       purgeAt: undefined,
     };
-    await get().createTrip(clone);
+    try {
+      await get().createTrip(clone);
+    } catch (e) {
+      if (copiedCover) void deleteTripCoverRef(copiedCover);
+      throw e;
+    }
     return newId;
   },
 
@@ -3185,6 +3205,17 @@ function enqueueLatestTripSave(tripId: string): Promise<void> {
     },
   );
   return queued;
+}
+
+/**
+ * Borra del bucket la portada que un viaje dejó de usar, salvo que otro viaje cargado la siga
+ * usando. Los duplicados anteriores a la copia de portadas comparten el mismo archivo.
+ */
+export function releaseTripCover(ref: string | null | undefined, tripId: string): void {
+  if (!isStoragePath(ref)) return;
+  const trips = useTripsStore.getState().trips;
+  const stillUsed = Object.values(trips).some((t) => t.id !== tripId && t.coverImage === ref);
+  if (!stillUsed) void deleteTripCoverRef(ref);
 }
 
 /**

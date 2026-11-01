@@ -143,7 +143,7 @@ import {
   getTripLocalCurrency,
   suggestLocalCurrency,
 } from "@/lib/finance-types";
-import { useTripsStore, useTripsRecord, saveTripNow } from "@/lib/trips-store";
+import { useTripsStore, useTripsRecord, saveTripNow, releaseTripCover } from "@/lib/trips-store";
 import { usePermissions } from "@/lib/access";
 import { TripMembersDialog } from "@/components/TripMembersDialog";
 import { LogisticsTab } from "@/components/enrollees/LogisticsTab";
@@ -151,7 +151,6 @@ import { ProvidersTab } from "@/components/ProvidersTab";
 import { useNewApplicationsCount } from "@/lib/application-alerts";
 import { DeleteTripDialog, DuplicateTripDialog } from "@/components/TripActionsDialogs";
 import { TripCoverPicker } from "@/components/TripCoverPicker";
-import { isStoragePath, deleteTripCoverRef } from "@/lib/trip-cover-storage";
 import { useTripCoverUrl } from "@/hooks/use-trip-cover-url";
 import { useCostsHistory } from "@/hooks/use-costs-history";
 import {
@@ -720,9 +719,7 @@ function TripHeader({
                 onClick={async () => {
                   const oldRef = trip.coverImage;
                   await updateTripMeta(trip.id, { coverImage: null });
-                  if (isStoragePath(oldRef)) {
-                    deleteTripCoverRef(oldRef).catch(() => {});
-                  }
+                  releaseTripCover(oldRef, trip.id);
                   toast.success("Foto de portada eliminada");
                 }}
               >
@@ -733,7 +730,7 @@ function TripHeader({
           </div>
         )}
       </div>
-      {perms.isOwner && (
+      {perms.canEditTrip && (
         <Dialog open={coverOpen} onOpenChange={setCoverOpen}>
           <DialogContent className="max-w-md">
             <DialogHeader>

@@ -86,7 +86,7 @@ export function DuplicateTripDialog({
           <div className="rounded-md border border-border/60 bg-secondary/40 p-3 space-y-1.5">
             <p className="text-xs font-semibold text-foreground">Se copian:</p>
             <ul className="text-xs text-muted-foreground list-disc pl-4 space-y-0.5">
-              <li>Nombre (con "(copia)"), destino, cover y capacidad</li>
+              <li>Nombre (con "(copia)"), destino, portada y capacidad</li>
               <li>Moneda base, moneda local y tasa del viaje</li>
               <li>Itinerario y días</li>
               <li>Costos, categorías y proveedores (con nuevos IDs)</li>

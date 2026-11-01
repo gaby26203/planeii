@@ -98,8 +98,6 @@ Las notas de costo, que antes se mostraban sin sanear, pasan por `sanitizeNoteHt
 | Analítica | "Visitas totales" son solo 30 días con tope de 5.000 filas | Leído |
 | Reservar | `/v/$slug/reservar` muestra el formulario interno aunque el modo sea externo; al enviar responde 409 | Leído |
 | Monedas | Dashboard, Finanzas y viajeras formatean en USD aunque la moneda base sea otra, y el dashboard suma monedas distintas | Leído |
-| Portada | Para organizadoras el botón aparece pero el diálogo solo se monta para owner | Leído |
-| Duplicar | El viaje duplicado comparte la referencia de portada; borrarla en uno rompe el otro | Leído |
 | Viajeras | Con crédito aplicado, las cuotas se crean por el precio completo | Leído |
 | Itinerario | Título, descripción y actividades del día no se pueden editar, pero las exportaciones los usan | Leído |
 | Estados | Valor por defecto `"planificacion"` no existe (debería ser `planificando`) | Leído |

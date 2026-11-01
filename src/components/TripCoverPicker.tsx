@@ -10,12 +10,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import {
-  ACCEPTED_COVER_TYPES,
-  deleteTripCoverRef,
-  isStoragePath,
-  uploadTripCover,
-} from "@/lib/trip-cover-storage";
+import { ACCEPTED_COVER_TYPES, uploadTripCover } from "@/lib/trip-cover-storage";
+import { releaseTripCover } from "@/lib/trips-store";
 import { useTripCoverUrl } from "@/hooks/use-trip-cover-url";
 import { BRAND_PHOTOS } from "@/lib/brand-photos";
 
@@ -44,9 +40,7 @@ export function TripCoverPicker({ tripId, value, onChange, compact = false }: Pr
       const newRef = await uploadTripCover(file, tripId);
       const oldRef = value;
       onChange(newRef);
-      if (isStoragePath(oldRef)) {
-        deleteTripCoverRef(oldRef).catch(() => {});
-      }
+      releaseTripCover(oldRef, tripId);
       toast.success("Foto de portada actualizada");
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "No se pudo subir la imagen.");
@@ -65,9 +59,7 @@ export function TripCoverPicker({ tripId, value, onChange, compact = false }: Pr
     }
     const oldRef = value;
     onChange(trimmed);
-    if (isStoragePath(oldRef)) {
-      deleteTripCoverRef(oldRef).catch(() => {});
-    }
+    releaseTripCover(oldRef, tripId);
     setUrlInput("");
     toast.success("Foto de portada actualizada");
   }
@@ -76,18 +68,14 @@ export function TripCoverPicker({ tripId, value, onChange, compact = false }: Pr
     if (src === value) return;
     const oldRef = value;
     onChange(src);
-    if (isStoragePath(oldRef)) {
-      deleteTripCoverRef(oldRef).catch(() => {});
-    }
+    releaseTripCover(oldRef, tripId);
     toast.success("Foto de portada actualizada");
   }
 
   function handleRemove() {
     const oldRef = value;
     onChange(null);
-    if (isStoragePath(oldRef)) {
-      deleteTripCoverRef(oldRef).catch(() => {});
-    }
+    releaseTripCover(oldRef, tripId);
   }
 
   const preview = (

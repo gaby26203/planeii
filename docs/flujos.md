@@ -191,6 +191,9 @@ sequenceDiagram
     end
   end
   UI->>SF: getAccountDefaults() (reembolsos, presets de costos)
+  opt duplicar con portada del bucket
+    S->>ST: copy → trip-covers/{uid}/{nuevoId}/{ts}.ext
+  end
   UI->>S: createTrip(data) optimista
   S->>SF: createTrip
   SF->>DB: has_role(owner) → INSERT trips → INSERT trip_members (organizadora)
@@ -200,7 +203,10 @@ sequenceDiagram
 ```
 
 Duplicar (`TripActionsDialogs.tsx`) copia el JSON sin viajeras, miembros ni invitaciones y
-reutiliza el mismo flujo.
+reutiliza el mismo flujo. Si la portada está en el bucket, la copia a la carpeta del viaje nuevo;
+si la copia falla, el duplicado queda sin portada en lugar de compartir el archivo. Al cambiar o
+quitar una portada, `releaseTripCover` solo borra el archivo si ningún otro viaje cargado lo usa,
+lo que protege a los duplicados anteriores a este cambio.
 
 La portada se elige en `TripCoverPicker`: subir un archivo al bucket `trip-covers`, elegir una
 de las fotos de marca de `src/lib/brand-photos.ts` o pegar una URL. Las fotos de marca y las URL
