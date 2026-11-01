@@ -4,6 +4,8 @@ export default defineConfig({
   testDir: "./e2e",
   // Los *.test.ts de esta carpeta son tests unitarios de Bun (`bun run test`).
   testMatch: "**/*.spec.ts",
+  // La lista de comprobación de despliegues tiene su propia configuración: `bun run smoke`.
+  testIgnore: "smoke/**",
   fullyParallel: false,
   workers: 1,
   retries: 0,

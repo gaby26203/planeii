@@ -41,7 +41,8 @@ Versiones instaladas según `bun.lock` a octubre de 2026.
 | Vite | 7.3 | Dev server y build |
 | TypeScript | 5.9 | Modo `strict` |
 | ESLint + Prettier | 9 / 3 | `bun run lint`, `bun run format` |
-| Playwright | 1.56 | Test e2e de horarios del itinerario |
+| Playwright | 1.56 | Test e2e de horarios del itinerario y lista de comprobación de despliegues |
+| GitHub Actions | | `ci.yml`: typecheck, tests y build en cada push; `smoke.yml`: comprobación a pedido |
 | Wrangler | 4.151 | Despliegue a Cloudflare |
 | Supabase CLI | 2.121 | Migraciones, tipos, entorno local |
 
@@ -58,6 +59,7 @@ Versiones instaladas según `bun.lock` a octubre de 2026.
 | `bun run lint` | ESLint |
 | `bun run test` | Tests unitarios de `e2e/*.test.ts` con Bun |
 | `bun run test:e2e` | Playwright sobre `e2e/*.spec.ts`; necesita servidor y sesión |
+| `bun run smoke` | Lista de comprobación de un despliegue (`e2e/smoke/`), ver migracion.md |
 | `bun run assets:download` | Descarga las fotos de la plantilla de Oaxaca desde la app de Lovable |
 | `bun run db:push` | Aplica `supabase/migrations` al proyecto vinculado |
 | `bun run db:types` | Regenera `src/integrations/supabase/types.ts` |
@@ -78,3 +80,4 @@ Plantilla completa en [`.env.example`](../.env.example).
 | `RESEND_API_KEY`, `EMAIL_FROM`, `EMAIL_REPLY_TO` | `src/lib/email-templates/send-email.ts` | Secreta / configuración |
 | `AI_API_KEY`, `AI_BASE_URL`, `AI_MODEL` | `src/lib/ai-gateway.server.ts` | Secreta / configuración |
 | `PLAYWRIGHT_BASE_URL`, `E2E_*` | Tests e2e | Solo tests |
+| `SMOKE_BASE_URL`, `SMOKE_EMAIL`, `SMOKE_PASSWORD`, `SMOKE_SLUG`, `SMOKE_WRITE` | `bun run smoke` | Solo tests; la contraseña es secreta |

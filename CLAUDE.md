@@ -16,4 +16,6 @@
 # Comandos
 
 - `bun run typecheck`, `bun run lint`, `bun run test`, `bun run build`.
+- `SMOKE_BASE_URL=<url> bun run smoke`: lista de comprobación de un despliegue (`e2e/smoke/`). Si
+  cambias textos o etiquetas que usa, actualiza sus selectores en el mismo commit.
 - Migraciones nuevas: `supabase/migrations/<timestamp>_<nombre>.sql`, y después `bun run db:types`.

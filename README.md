@@ -45,6 +45,17 @@ bun run test        # tests unitarios
 bun run build
 ```
 
+GitHub Actions corre typecheck, tests y build en cada push (`.github/workflows/ci.yml`).
+
+Para comprobar un despliegue, por ejemplo el día del corte, usa la lista de comprobación
+automática:
+
+```bash
+SMOKE_BASE_URL=https://<dominio> bun run smoke
+```
+
+Qué cubre y qué variables usa: [docs/migracion.md](docs/migracion.md#8-comprobación-final).
+
 ## Despliegue
 
 ```bash
