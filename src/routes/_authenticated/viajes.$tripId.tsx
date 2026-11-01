@@ -739,7 +739,8 @@ function TripHeader({
             <DialogHeader>
               <DialogTitle>Foto de portada</DialogTitle>
               <DialogDescription>
-                Subí un archivo o pegá una URL. Sin foto se muestra el gradiente por defecto.
+                Elige una foto de la galería, sube un archivo o pega una URL. Sin foto se muestra
+                el degradado por defecto.
               </DialogDescription>
             </DialogHeader>
             <TripCoverPicker

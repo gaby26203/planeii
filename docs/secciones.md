@@ -90,11 +90,13 @@ publicar, historial de 20 publicaciones, vista previa compartible por 24 horas.
 | `/invitacion/$token` | Acepta una invitación a un viaje |
 | `/v/$slug` | Landing publicada con SSR y analítica |
 | `/v/$slug/reservar` | Formulario de solicitud |
-
-Las tres pantallas de acceso comparten `AuthShell`: una foto de marca al costado en escritorio
-y como franja superior en el teléfono.
 | `/preview` | Lienzo del editor (iframe) o snapshot de vista previa |
 | `POST /api/public/apply` | Recibe solicitudes y envía correos |
 | `POST /api/public/track` | Registra eventos de analítica |
 | `GET /api/public/page-image/*` | Sirve fotos de landings desde el bucket privado |
 | `GET /api/dev/email-preview` | Vista previa de plantillas de correo, solo en desarrollo |
+
+Las tres pantallas de acceso comparten `AuthShell`: una foto de marca al costado en escritorio
+y como franja superior en el teléfono. En escritorio, la frase de marca va sobre un velo oscuro de
+alto fijo que mantiene un contraste de al menos 9:1 con cualquiera de las cinco fotos. En el
+teléfono, la franja no lleva texto: la frase pasa bajo el logo, sobre el fondo liso.
