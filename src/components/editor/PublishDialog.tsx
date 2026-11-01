@@ -41,7 +41,7 @@ export function PublishDialog({ open, onOpenChange, document, tripId, onPublishe
     });
     supabase.from("trip_pages").select("slug").eq("trip_id", tripId).maybeSingle().then(({ data, error }) => {
       if (cancelled) return;
-      if (error) setMessage("No pudimos leer la página publicada. Revisá tu conexión.");
+      if (error) setMessage("No pudimos leer la página publicada. Revisa tu conexión.");
       setExistingSlug(data?.slug ?? null);
       setSlug((current) => current || data?.slug || toSlug(`${document.trip.destination} ${document.trip.datesShort}`));
     });
@@ -63,13 +63,13 @@ export function PublishDialog({ open, onOpenChange, document, tripId, onPublishe
   const publish = async () => {
     const clean = toSlug(slug);
     if (clean.length < 3) return setMessage("La dirección debe tener al menos 3 caracteres.");
-    if (!user) return setMessage("Tu sesión venció. Volvé a iniciar sesión para publicar.");
+    if (!user) return setMessage("Tu sesión venció. Vuelve a iniciar sesión para publicar.");
     setBusy(true);
     setMessage(null);
     try {
       const { data: bySlug, error: slugError } = await supabase.from("trip_pages").select("trip_id").eq("slug", clean).maybeSingle();
       if (slugError) throw slugError;
-      if (bySlug && bySlug.trip_id !== tripId) return setMessage("Esa dirección ya está en uso. Probá otra.");
+      if (bySlug && bySlug.trip_id !== tripId) return setMessage("Esa dirección ya está en uso. Prueba otra.");
       const { data: existing, error: existingError } = await supabase.from("trip_pages").select("id").eq("trip_id", tripId).maybeSingle();
       if (existingError) throw existingError;
       const doc = await externalizeDocumentImages(tripId, document);
@@ -94,10 +94,10 @@ export function PublishDialog({ open, onOpenChange, document, tripId, onPublishe
       const text = error instanceof Error ? error.message : String((error as { message?: string })?.message ?? error);
       console.error("Error al publicar", error);
       const friendly = (
-        /too large|payload/i.test(text) ? "Las imágenes son demasiado pesadas. Usá menos fotos o más pequeñas."
-        : /permission|policy|row-level/i.test(text) ? "No tenés permiso para publicar este viaje."
-        : /fetch|network/i.test(text) ? "Sin conexión. Revisá internet e intentá nuevamente."
-        : "No se pudo publicar. Intentá de nuevo.");
+        /too large|payload/i.test(text) ? "Las imágenes son demasiado pesadas. Usa menos fotos o más pequeñas."
+        : /permission|policy|row-level/i.test(text) ? "No tienes permiso para publicar este viaje."
+        : /fetch|network/i.test(text) ? "Sin conexión. Revisa internet e intenta nuevamente."
+        : "No se pudo publicar. Intenta de nuevo.");
       setMessage(friendly);
       toast.error(friendly);
     } finally {
@@ -120,13 +120,13 @@ export function PublishDialog({ open, onOpenChange, document, tripId, onPublishe
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>{publishedUrl ? "¡Listo para compartir!" : existingSlug ? "Actualizar página" : "Publicar viaje"}</DialogTitle>
-          <DialogDescription>{publishedUrl ? "Enviá este enlace a tus viajeras." : "Elegí la dirección del enlace que vas a compartir con las viajeras."}</DialogDescription>
+          <DialogDescription>{publishedUrl ? "Envía este enlace a tus viajeras." : "Elige la dirección del enlace que vas a compartir con las viajeras."}</DialogDescription>
         </DialogHeader>
 
         {authState === "loading" ? (
           <p className="text-sm text-muted-foreground">Preparando…</p>
         ) : authState === "missing" ? (
-          <p className="text-sm text-destructive">Tu sesión venció. Volvé a iniciar sesión para publicar.</p>
+          <p className="text-sm text-destructive">Tu sesión venció. Vuelve a iniciar sesión para publicar.</p>
         ) : publishedUrl ? (
           <div className="space-y-3">
             <p className="flex items-center gap-2 text-sm font-medium"><Check className="h-4 w-4 text-primary" /> Tu página está publicada</p>
@@ -135,7 +135,7 @@ export function PublishDialog({ open, onOpenChange, document, tripId, onPublishe
               <Button asChild variant="outline"><a href={`https://wa.me/?text=${encodeURIComponent(`${document.trip.destination}: ${publishedUrl}`)}`} target="_blank" rel="noreferrer"><MessageCircle /> WhatsApp</a></Button>
               <Button asChild><a href={publishedUrl} target="_blank" rel="noreferrer"><ExternalLink /> Abrir página</a></Button>
             </div>
-            <p className="text-xs text-muted-foreground">Cuando hagas más cambios, tocá «Actualizar página».</p>
+            <p className="text-xs text-muted-foreground">Cuando hagas más cambios, toca «Actualizar página».</p>
           </div>
         ) : (
           <div className="space-y-4">

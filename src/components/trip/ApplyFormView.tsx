@@ -51,12 +51,12 @@ export function ApplyFormView({ document, slug, tripId, mode = "live", forceThan
 
   const onSubmit = async (event: FormEvent) => {
     event.preventDefault();
-    if (editor) return setError("Vista del editor: el envío está desactivado. Publicá y probalo desde el enlace.");
+    if (editor) return setError("Vista del editor: el envío está desactivado. Publica y pruébalo desde el enlace.");
     setError("");
     const whatsapp = normalizeWhatsapp(code, phone);
-    if (fullName.trim().length < 2) return setError("Escribí tu nombre y apellido.");
-    if (!/^\+\d{7,16}$/.test(whatsapp)) return setError("Revisá tu número de WhatsApp.");
-    if (!/^\S+@\S+\.\S+$/.test(email.trim())) return setError("Revisá tu correo.");
+    if (fullName.trim().length < 2) return setError("Escribe tu nombre y apellido.");
+    if (!/^\+\d{7,16}$/.test(whatsapp)) return setError("Revisa tu número de WhatsApp.");
+    if (!/^\S+@\S+\.\S+$/.test(email.trim())) return setError("Revisa tu correo.");
     for (const b of form.blocks) {
       if (b.hidden || !b.required || !isQuestion(b.type)) continue;
       const v = answers[b.id];

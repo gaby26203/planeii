@@ -88,7 +88,7 @@ export function TodoDatesCell({
           />
           <div className="flex items-center justify-between gap-2 border-t border-border p-2">
             <span className="text-[11px] text-muted-foreground">
-              Elegí una fecha o un rango
+              Elige una fecha o un rango
             </span>
             <Button
               variant="ghost"

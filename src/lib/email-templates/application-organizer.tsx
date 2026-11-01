@@ -53,7 +53,7 @@ export const template = {
   displayName: 'Aviso a organizadoras',
   previewData: {
     tripName: 'Relámpagos del Catatumbo', fullName: 'María Pérez', whatsapp: '+584141234567', email: 'maria@ejemplo.com',
-    answers: [{ label: '¿Por qué querés hacer este viaje?', value: 'Quiero conocer el Catatumbo.' }],
+    answers: [{ label: '¿Por qué quieres hacer este viaje?', value: 'Quiero conocer el Catatumbo.' }],
     source: 'instagram', panelUrl: 'https://chamaviaja.com', whatsappUrl: 'https://wa.me/584141234567',
   },
 } satisfies TemplateEntry

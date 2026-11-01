@@ -68,7 +68,7 @@ export function EditItemDialog({
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>
-            Actualizá el título o la descripción corta del elemento.
+            Actualiza el título o la descripción corta del elemento.
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-3">

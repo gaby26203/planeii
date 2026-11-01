@@ -525,7 +525,7 @@ function FinanzasPage() {
 
             {([
               { key: "available", data: credits.available, tone: "text-chart-3", emptyMsg: "Sin créditos disponibles. Cuando una viajera pague de más y elijas \"Dejar como crédito\", aparecerá aquí." },
-              { key: "reserved", data: credits.reserved, tone: "text-primary", emptyMsg: "Sin créditos reservados. Usá \"Aplicar crédito → Reservar para próximo\" desde la tarjeta de viajera." },
+              { key: "reserved", data: credits.reserved, tone: "text-primary", emptyMsg: "Sin créditos reservados. Usa \"Aplicar crédito → Reservar para próximo\" desde la tarjeta de viajera." },
               { key: "applied", data: credits.applied, tone: "text-terracotta", emptyMsg: "Sin créditos aplicados aún. Aparecerán acá los descuentos recibidos en cada viaje destino." },
             ] as const).map((tab) => (
               <TabsContent key={tab.key} value={tab.key} className="mt-3">

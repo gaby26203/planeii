@@ -295,7 +295,7 @@ function UsersTab() {
                         <p className="font-medium">
                           {u.displayName || (u.email?.split("@")[0] ?? "Sin nombre")}
                           {isSelf && (
-                            <span className="ml-2 text-[10px] text-muted-foreground">(vos)</span>
+                            <span className="ml-2 text-[10px] text-muted-foreground">(tú)</span>
                           )}
                         </p>
                       </div>
@@ -664,7 +664,7 @@ function GlobalInviteDialog({
               <Label className="text-xs">Viaje</Label>
               <Select value={tripId} onValueChange={setTripId}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Elegí un viaje" />
+                  <SelectValue placeholder="Elige un viaje" />
                 </SelectTrigger>
                 <SelectContent>
                   {trips.map((t) => (

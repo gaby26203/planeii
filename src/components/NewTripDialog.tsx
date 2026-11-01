@@ -142,7 +142,7 @@ export function NewTripDialog({ trigger }: Props) {
       : destination.trim();
 
     if (!name.trim() || !destinationSummary) {
-      toast.error("Completá nombre y destino.");
+      toast.error("Completa nombre y destino.");
       return;
     }
     if (startDate && endDate && new Date(endDate) < new Date(startDate)) {
@@ -219,25 +219,25 @@ export function NewTripDialog({ trigger }: Props) {
     } catch (e: any) {
       const raw = String(e?.message ?? e ?? "");
       let title = "No se pudo crear el viaje";
-      let description = raw || "Ocurrió un error inesperado. Volvé a intentarlo.";
+      let description = raw || "Ocurrió un error inesperado. Vuelve a intentarlo.";
       if (/uuid|invalid input syntax/i.test(raw)) {
         title = "Datos inválidos";
-        description = "Alguno de los campos tiene un formato incorrecto. Revisá fechas y valores numéricos.";
+        description = "Alguno de los campos tiene un formato incorrecto. Revisa fechas y valores numéricos.";
       } else if (/unauthorized|jwt|auth/i.test(raw)) {
         title = "Sesión expirada";
-        description = "Volvé a iniciar sesión y probá de nuevo.";
+        description = "Vuelve a iniciar sesión y prueba de nuevo.";
       } else if (/network|fetch|failed to fetch|timeout/i.test(raw)) {
         title = "Sin conexión con el servidor";
-        description = "Revisá tu conexión a internet y reintentá en unos segundos.";
+        description = "Revisa tu conexión a internet y reintenta en unos segundos.";
       } else if (/duplicate|already exists|unique/i.test(raw)) {
         title = "Viaje duplicado";
-        description = "Ya existe un viaje con esos datos. Cambiá el nombre o el destino.";
+        description = "Ya existe un viaje con esos datos. Cambia el nombre o el destino.";
       } else if (/zod|validation|expected|required/i.test(raw)) {
         title = "Datos incompletos";
-        description = "Faltan campos obligatorios o hay valores fuera de rango. Revisá el formulario.";
+        description = "Faltan campos obligatorios o hay valores fuera de rango. Revisa el formulario.";
       } else if (/permission|rls|policy/i.test(raw)) {
         title = "Sin permisos";
-        description = "Tu cuenta no tiene permisos para crear viajes. Contactá al owner.";
+        description = "Tu cuenta no tiene permisos para crear viajes. Contacta al owner.";
       } else if (/database|postgres|pg |db /i.test(raw)) {
         title = "Error de base de datos";
       }
@@ -250,7 +250,7 @@ export function NewTripDialog({ trigger }: Props) {
   async function handleCreateInvite() {
     if (!createdTripId) return;
     if (!email.trim() || !/.+@.+\..+/.test(email)) {
-      toast.error("Ingresá un email válido.");
+      toast.error("Ingresa un email válido.");
       return;
     }
     setSaving(true);
@@ -315,8 +315,8 @@ export function NewTripDialog({ trigger }: Props) {
           </DialogTitle>
           <DialogDescription>
             {step === 1
-              ? "Datos básicos para arrancar. Podés completar el resto después."
-              : "Opcional. Si preferís, saltalo y hacelo más tarde desde el viaje."}
+              ? "Datos básicos para arrancar. Puedes completar el resto después."
+              : "Opcional. Si prefieres, sáltalo y hazlo más tarde desde el viaje."}
           </DialogDescription>
         </DialogHeader>
 
@@ -564,7 +564,7 @@ export function NewTripDialog({ trigger }: Props) {
                 <div className="rounded-md border bg-muted/40 p-3 space-y-2">
                   <p className="text-sm font-medium">Invitación lista para compartir</p>
                   <p className="text-xs text-muted-foreground">
-                    Copiá este link y envialo por WhatsApp o email a{" "}
+                    Copia este link y envíalo por WhatsApp o email a{" "}
                     <span className="font-medium">{email}</span>. Expira en 7 días.
                   </p>
                   <div className="flex gap-2">

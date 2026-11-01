@@ -49,7 +49,7 @@ export function AccessGate({ can, tripId, children, fallback }: Props) {
         </div>
         <h1 className="font-display text-2xl font-semibold text-foreground">Sin acceso</h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          Tu cuenta todavía no tiene acceso a esta sección. Si te invitaron a este viaje, pedile a
+          Tu cuenta todavía no tiene acceso a esta sección. Si te invitaron a este viaje, pídele a
           la organizadora principal que verifique tu invitación con este mismo correo.
         </p>
         <div className="mt-6 flex justify-center gap-3">

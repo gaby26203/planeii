@@ -75,7 +75,7 @@ export function TripPreview() {
     return () => window.document.removeEventListener("click", onClick, true);
   }, [editorPreview, view]);
 
-  if (!document) return <p className="p-6 text-center text-muted-foreground">{loaded ? "Esta vista previa ya no está disponible. Abrí Vista previa nuevamente desde el editor para ver tus cambios actuales." : "Cargando vista previa…"}</p>;
+  if (!document) return <p className="p-6 text-center text-muted-foreground">{loaded ? "Esta vista previa ya no está disponible. Abre Vista previa nuevamente desde el editor para ver tus cambios actuales." : "Cargando vista previa…"}</p>;
 
   if (view !== "landing") return <ApplyFormView document={document} slug="vista-previa" tripId="" mode="editor" inlineEditing={editorPreview} forceThanks={view === "thanks"} />;
 

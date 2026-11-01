@@ -19,13 +19,13 @@ function autoChecks(trip: TripData, ctaIssues: string[] = []): AutoCheck[] {
   return [
     { label: "Todos los botones llevan a un destino válido", ok: ctaIssues.length === 0, detail: ctaIssues.length ? ctaIssues.join(" · ") : undefined },
     { label: "Los textos de los botones de reserva están completos", ok: !!trip.copy.bookingButton.trim() && !!trip.copy.stickyBook.trim() && !!trip.finalCta.button.trim() },
-    { label: "Cada pregunta frecuente tiene pregunta y respuesta", ok: faqOk, detail: faqOk ? undefined : "Completá o eliminá las preguntas vacías." },
+    { label: "Cada pregunta frecuente tiene pregunta y respuesta", ok: faqOk, detail: faqOk ? undefined : "Completa o elimina las preguntas vacías." },
     { label: "Hay al menos un dato de contacto real", ok: contactOk },
   ];
 }
 
 const MANUAL = [
-  "Abrí el menú en la vista móvil y cada enlace lleva a su sección",
+  "Abre el menú en la vista móvil y cada enlace lleva a su sección",
   "Las preguntas frecuentes se abren y cierran al tocarlas",
   "El botón de reserva (y el fijo de abajo) abre la página correcta",
 ];
@@ -48,12 +48,12 @@ export function PrePublishChecklist({ open, onOpenChange, trip, ctaIssues, onOpe
       <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>Antes de publicar</DialogTitle>
-          <DialogDescription>Revisá que todo funcione en el teléfono antes de compartir la página.</DialogDescription>
+          <DialogDescription>Revisa que todo funcione en el teléfono antes de compartir la página.</DialogDescription>
         </DialogHeader>
         <div className="space-y-5">
           <div>
             <p className="mb-1 text-sm font-semibold">{checks.every((c) => c.ok) ? "Todo listo" : `${checks.filter((c) => !c.ok).length} detalle(s) para mejorar`}</p>
-            <p className="mb-2 text-xs text-muted-foreground">Son sugerencias: podés publicar igual y corregirlas después. Las casillas de abajo son opcionales.</p>
+            <p className="mb-2 text-xs text-muted-foreground">Son sugerencias: puedes publicar igual y corregirlas después. Las casillas de abajo son opcionales.</p>
             <ul className="space-y-2">
               {checks.map((c) => (
                 <li key={c.label} className="flex gap-2 text-sm">

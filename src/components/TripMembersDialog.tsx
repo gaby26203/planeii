@@ -152,7 +152,7 @@ export function TripMembersDialog({ tripId, open, onOpenChange }: Props) {
             : "Invitación creada. Link copiado al portapapeles.",
         );
       } catch {
-        toast.success("Invitación creada. Copiá el link desde la lista.");
+        toast.success("Invitación creada. Copia el link desde la lista.");
       }
       setNewEmail("");
       setNewRole("tour_leader");
@@ -253,7 +253,7 @@ export function TripMembersDialog({ tripId, open, onOpenChange }: Props) {
             <Users className="h-4 w-4" /> Miembros del viaje
           </DialogTitle>
           <DialogDescription>
-            Invitá por email. El link es válido por 7 días y se copia automáticamente al portapapeles.
+            Invita por email. El link es válido por 7 días y se copia automáticamente al portapapeles.
           </DialogDescription>
         </DialogHeader>
 

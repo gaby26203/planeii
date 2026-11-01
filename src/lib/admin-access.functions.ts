@@ -82,7 +82,7 @@ export const setOwnerRole = createServerFn({ method: "POST" })
           .select("*", { count: "exact", head: true })
           .eq("role", "owner");
         if ((count ?? 0) <= 1) {
-          throw new Error("No podés revocarte a vos misma siendo la única owner.");
+          throw new Error("No puedes revocarte a ti misma siendo la única owner.");
         }
       }
       const { error } = await supabaseAdmin

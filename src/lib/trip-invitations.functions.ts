@@ -252,7 +252,7 @@ export const acceptTripInvitation = createServerFn({ method: "POST" })
     if (!inv) throw new Error("Invitación no encontrada.");
     if ((inv.email as string).toLowerCase() !== jwtEmail) {
       throw new Error(
-        `Esta invitación es para ${inv.email}. Iniciá sesión con ese correo para aceptarla.`,
+        `Esta invitación es para ${inv.email}. Inicia sesión con ese correo para aceptarla.`,
       );
     }
     if (inv.status === "accepted") {
@@ -274,7 +274,7 @@ export const acceptTripInvitation = createServerFn({ method: "POST" })
     }
 
     if (new Date(inv.expires_at as string).getTime() < Date.now()) {
-      throw new Error("Esta invitación expiró. Pedile a la organizadora que te envíe una nueva.");
+      throw new Error("Esta invitación expiró. Pídele a la organizadora que te envíe una nueva.");
     }
 
     const tripId = inv.trip_id as string;

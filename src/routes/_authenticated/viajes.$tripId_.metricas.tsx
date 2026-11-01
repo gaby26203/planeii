@@ -82,7 +82,7 @@ function TripMetricsPage() {
       </div>
 
       {isLoading ? <p className="text-sm text-muted-foreground">Cargando métricas…</p> : null}
-      {isError ? <p className="text-sm text-destructive">No se pudieron cargar las métricas. Intentá nuevamente.</p> : null}
+      {isError ? <p className="text-sm text-destructive">No se pudieron cargar las métricas. Intenta nuevamente.</p> : null}
 
       {metrics ? (
         <>

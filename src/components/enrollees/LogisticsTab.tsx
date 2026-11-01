@@ -107,7 +107,7 @@ export function LogisticsTab({ tripId, enrollees, canEdit, tripStart, tripEnd }:
   if (enrollees.length === 0) {
     return (
       <div className="rounded-lg border border-border/60 p-8 text-center text-sm text-muted-foreground">
-        Inscribí viajeras para registrar su logística de vuelos y seguros.
+        Inscribe viajeras para registrar su logística de vuelos y seguros.
       </div>
     );
   }

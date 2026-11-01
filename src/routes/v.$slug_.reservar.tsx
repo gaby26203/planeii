@@ -11,8 +11,8 @@ export const Route = createFileRoute("/v/$slug_/reservar")({
   head: ({ loaderData }) => {
     if (!loaderData) return { meta: [{ title: "Solicitud no disponible" }, { name: "robots", content: "noindex" }] };
     const { trip } = loaderData.document;
-    const title = `Solicitá tu lugar · ${trip.title}`;
-    const description = `Completá tu solicitud para ${trip.title} y te contactamos por WhatsApp.`;
+    const title = `Solicita tu lugar · ${trip.title}`;
+    const description = `Completa tu solicitud para ${trip.title} y te contactamos por WhatsApp.`;
     return {
       meta: [
         { title },

@@ -161,7 +161,7 @@ function assertScopes(scopes: TripPermKey[], perms: TripPermMap | null) {
   const missing = scopes.filter((s) => !perms?.[s]);
   if (missing.length > 0) {
     throw new Error(
-      `No tenés permiso para: ${missing.join(", ")}. Pedile al owner que te habilite estos accesos.`,
+      `No tienes permiso para: ${missing.join(", ")}. Pídele al owner que te habilite estos accesos.`,
     );
   }
 }
@@ -244,7 +244,7 @@ export const updateTripData = createServerFn({ method: "POST" })
     );
 
     if (!isOwner && !isTripOwner) {
-      if (!isMember) throw new Error("No sos miembro de este viaje.");
+      if (!isMember) throw new Error("No eres miembro de este viaje.");
       const scopes = requiredScopes(existing.data, data.data);
       assertScopes(scopes, perms);
     }

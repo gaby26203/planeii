@@ -13,7 +13,7 @@ export const Route = createFileRoute("/_authenticated/viajes/$tripId_/pagina")({
       { title: "Página de venta del viaje | Planeii" },
       { name: "description", content: "Editor visual de la página pública de venta del viaje." },
       { property: "og:title", content: "Página de venta del viaje | Planeii" },
-      { property: "og:description", content: "Personalizá y publicá la landing de tu viaje." },
+      { property: "og:description", content: "Personaliza y publica la landing de tu viaje." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],

@@ -410,11 +410,11 @@ export function TripEditor({ tripId, initialTrip, publishedDocument, backHref }:
   const replaceImage = (file?: File) => {
     if (!file) return;
     if (!PAGE_IMAGE_TYPES.includes(file.type)) {
-      toast.error("Ese archivo no es una foto. Usá JPG, PNG o WebP.");
+      toast.error("Ese archivo no es una foto. Usa JPG, PNG o WebP.");
       return;
     }
     if (file.size > PAGE_IMAGE_MAX_INPUT_BYTES) {
-      toast.error(`Esa foto pesa ${pageImageSizeLabel(file.size)} y es demasiado grande. Elegí otra de hasta 25 MB.`);
+      toast.error(`Esa foto pesa ${pageImageSizeLabel(file.size)} y es demasiado grande. Elige otra de hasta 25 MB.`);
       return;
     }
     const reader = new FileReader();
@@ -439,7 +439,7 @@ export function TripEditor({ tripId, initialTrip, publishedDocument, backHref }:
       imageSource = await uploadPageImage(tripId, cropped);
     } catch (error) {
       console.error("No se pudo subir la foto", error);
-      toast.error("No se pudo subir la foto. Revisá tu conexión e intentá nuevamente.");
+      toast.error("No se pudo subir la foto. Revisa tu conexión e intenta nuevamente.");
       return;
     }
     if (imageTarget.startsWith("itinerary-group-")) {
@@ -579,7 +579,7 @@ export function TripEditor({ tripId, initialTrip, publishedDocument, backHref }:
           <Button type="button" variant="outline" className="hidden sm:inline-flex" disabled={!hydrated} onClick={() => {
             const previewWindow = window.open("", "_blank");
             if (!previewWindow) {
-              window.alert("El navegador bloqueó la nueva pestaña. Permití ventanas emergentes e intentá nuevamente.");
+              window.alert("El navegador bloqueó la nueva pestaña. Permite ventanas emergentes e intenta nuevamente.");
               return;
             }
             previewWindow.opener = null;
@@ -590,7 +590,7 @@ export function TripEditor({ tripId, initialTrip, publishedDocument, backHref }:
               .catch((error) => {
                 console.error("No se pudo crear la vista previa", error);
                 previewWindow.close();
-                window.alert("No se pudo preparar la vista previa. Revisá tu conexión e intentá nuevamente.");
+                window.alert("No se pudo preparar la vista previa. Revisa tu conexión e intenta nuevamente.");
               });
           }}><Eye /> Vista previa</Button>
           <Button type="button" variant="outline" className="hidden sm:inline-flex" asChild><a href={`/viajes/${tripId}/metricas`}><ChartColumn /> Métricas</a></Button>
@@ -616,7 +616,7 @@ export function TripEditor({ tripId, initialTrip, publishedDocument, backHref }:
               <SelectTrigger className="h-8 w-32 shrink-0"><SelectValue /></SelectTrigger>
               <SelectContent><SelectItem value="compact">Interlineado compacto</SelectItem><SelectItem value="normal">Interlineado normal</SelectItem><SelectItem value="relaxed">Interlineado amplio</SelectItem></SelectContent>
             </Select>
-            <Button type="button" disabled={!inlineSelection.hasSelection} variant={inlineSelection.href ? "secondary" : "ghost"} size="icon" onPointerDown={(e) => e.preventDefault()} onClick={() => { const href = window.prompt("Enlace de la selección (vacío para quitar)", inlineSelection.href); if (href === null) return; if (href && !safeTextLink(href)) { toast.error("Ingresá un enlace válido (https://, mailto: o tel:)."); return; } formatSelection("link", href); }} aria-label="Agregar enlace" title="Enlace en la selección"><Link2 /></Button>
+            <Button type="button" disabled={!inlineSelection.hasSelection} variant={inlineSelection.href ? "secondary" : "ghost"} size="icon" onPointerDown={(e) => e.preventDefault()} onClick={() => { const href = window.prompt("Enlace de la selección (vacío para quitar)", inlineSelection.href); if (href === null) return; if (href && !safeTextLink(href)) { toast.error("Ingresa un enlace válido (https://, mailto: o tel:)."); return; } formatSelection("link", href); }} aria-label="Agregar enlace" title="Enlace en la selección"><Link2 /></Button>
             <Button type="button" disabled={!inlineSelection.hasSelection} variant="ghost" size="icon" onPointerDown={(e) => e.preventDefault()} onClick={() => formatSelection("clear")} aria-label="Quitar formato de selección" title="Quitar formato de selección"><Eraser /></Button>
             <Button type="button" variant="ghost" size="sm" onClick={resetTextStyle}>Restablecer</Button>
             <Button type="button" variant="ghost" size="icon" onClick={() => setSelectedTextPath(null)} aria-label="Cerrar formato"><X /></Button>
@@ -658,7 +658,7 @@ export function TripEditor({ tripId, initialTrip, publishedDocument, backHref }:
                   {pageCtaWarnings.length > 0 && <ul className="mt-3 space-y-1 border border-destructive/40 p-2 text-[11px] text-destructive">{pageCtaWarnings.map((item) => <li key={item.ctaId}><strong>{item.label}:</strong> {item.message}</li>)}</ul>}
                   <label className="mt-3 block text-xs">Aplicar a todos los botones de reserva
                     <Select value="" onValueChange={(target) => mutate((current) => ({ ...current, ctaLinks: applyToBookingCtas(current.ctaLinks, target === "form" ? { target: "form" } : { target: "url", url: current.bookingForm?.externalUrl?.trim() || current.trip.bookingUrl }) }))}>
-                      <SelectTrigger className="mt-1 h-8 text-xs"><SelectValue placeholder="Elegí un destino para todos" /></SelectTrigger>
+                      <SelectTrigger className="mt-1 h-8 text-xs"><SelectValue placeholder="Elige un destino para todos" /></SelectTrigger>
                       <SelectContent><SelectItem value="form">Formulario interno</SelectItem><SelectItem value="url">URL (enlace de reserva actual)</SelectItem></SelectContent>
                     </Select>
                   </label>
@@ -700,7 +700,7 @@ export function TripEditor({ tripId, initialTrip, publishedDocument, backHref }:
 
             {panel === "design" && (
               <div className="space-y-6">
-                <div><div className="flex items-center justify-between"><div><p className="text-sm font-semibold">Imágenes</p><p className="mt-1 text-xs text-muted-foreground">Elegí una miniatura para reemplazar y reencuadrar la imagen. Cada foto se ajusta sola a ~450 KB.</p></div><Button type="button" variant="ghost" size="icon" onClick={() => setImagesOpen((value) => !value)} aria-label={imagesOpen ? "Ocultar imágenes" : "Mostrar imágenes"}><ImagePlus /></Button></div>{imagesOpen && <div className="mt-4 grid grid-cols-2 gap-3">{imageItems.map((item) => <button key={item.key} type="button" onClick={() => chooseImage(item.key)} className="group overflow-hidden border bg-muted text-left"><img src={item.src} alt="" className="aspect-[4/3] w-full object-cover transition-opacity group-hover:opacity-80" /><span className="block truncate p-2 text-xs font-medium">{item.label}</span></button>)}</div>}</div>
+                <div><div className="flex items-center justify-between"><div><p className="text-sm font-semibold">Imágenes</p><p className="mt-1 text-xs text-muted-foreground">Elige una miniatura para reemplazar y reencuadrar la imagen. Cada foto se ajusta sola a ~450 KB.</p></div><Button type="button" variant="ghost" size="icon" onClick={() => setImagesOpen((value) => !value)} aria-label={imagesOpen ? "Ocultar imágenes" : "Mostrar imágenes"}><ImagePlus /></Button></div>{imagesOpen && <div className="mt-4 grid grid-cols-2 gap-3">{imageItems.map((item) => <button key={item.key} type="button" onClick={() => chooseImage(item.key)} className="group overflow-hidden border bg-muted text-left"><img src={item.src} alt="" className="aspect-[4/3] w-full object-cover transition-opacity group-hover:opacity-80" /><span className="block truncate p-2 text-xs font-medium">{item.label}</span></button>)}</div>}</div>
                 <div><p className="text-sm font-semibold">Identidad visual</p><p className="mt-1 text-xs text-muted-foreground">Combinaciones cuidadas para mantener contraste y legibilidad.</p></div>
                 <div className="space-y-2"><Label>Paleta</Label><Select value={document.theme.palette} onValueChange={(palette) => mutate((current) => ({ ...current, theme: { ...current.theme, palette: palette as typeof current.theme.palette } }))}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="oaxaca">Oaxaca cálido</SelectItem><SelectItem value="pacific">Pacífico sereno</SelectItem><SelectItem value="botanical">Botánico</SelectItem></SelectContent></Select></div>
                 <div className="space-y-2"><Label>Tipografías</Label><Select value={document.theme.fonts} onValueChange={(fonts) => mutate((current) => ({ ...current, theme: { ...current.theme, fonts: fonts as typeof current.theme.fonts } }))}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="editorial">Editorial</SelectItem><SelectItem value="modern">Moderna</SelectItem><SelectItem value="classic">Clásica</SelectItem></SelectContent></Select></div>
@@ -749,7 +749,7 @@ export function TripEditor({ tripId, initialTrip, publishedDocument, backHref }:
         </aside>
 
         <section className="editor-canvas relative min-h-0 min-w-0 overflow-auto p-3 md:p-7" aria-label="Vista previa de la landing">
-          {showGuide && device === "desktop" && <div className="mx-auto mb-3 grid max-w-xl grid-cols-[minmax(0,1fr)_auto] items-center gap-3 border bg-background px-3 py-2 text-xs shadow-sm"><span>Tocá cualquier texto o imagen para editarla directamente.</span><Button type="button" variant="ghost" size="icon" onClick={() => { window.localStorage.setItem("planei-editor-guide-dismissed", "1"); setShowGuide(false); }} aria-label="Cerrar guía"><X /></Button></div>}
+          {showGuide && device === "desktop" && <div className="mx-auto mb-3 grid max-w-xl grid-cols-[minmax(0,1fr)_auto] items-center gap-3 border bg-background px-3 py-2 text-xs shadow-sm"><span>Toca cualquier texto o imagen para editarla directamente.</span><Button type="button" variant="ghost" size="icon" onClick={() => { window.localStorage.setItem("planei-editor-guide-dismissed", "1"); setShowGuide(false); }} aria-label="Cerrar guía"><X /></Button></div>}
           {device === "mobile" && <div className="mx-auto mb-3 grid max-w-[406px] grid-cols-[minmax(0,1fr)_auto] items-center gap-3 text-xs text-muted-foreground"><span className="inline-flex min-w-0 items-center gap-2"><Smartphone className="h-3.5 w-3.5 shrink-0" /><span className="truncate">Teléfono · 390 px</span></span><Button type="button" variant="outline" size="sm" onClick={() => setMobileHeroPositionOpen(true)}><Move /> Ajustar portada móvil</Button></div>}
           {panel === "form" && (
             <div className="mx-auto mb-3 flex max-w-xl flex-wrap items-center justify-center gap-2 text-xs">

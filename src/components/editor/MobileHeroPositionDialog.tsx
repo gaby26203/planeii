@@ -44,7 +44,7 @@ export function MobileHeroPositionDialog({ open, imageSrc, value, onOpenChange, 
       <DialogContent className="max-h-[92dvh] max-w-lg overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Ajustar portada móvil</DialogTitle>
-          <DialogDescription>Arrastrá la foto hasta dejar visible la parte más importante.</DialogDescription>
+          <DialogDescription>Arrastra la foto hasta dejar visible la parte más importante.</DialogDescription>
         </DialogHeader>
         <div className="mx-auto w-full max-w-[270px]">
           <div
@@ -64,7 +64,7 @@ export function MobileHeroPositionDialog({ open, imageSrc, value, onOpenChange, 
               draggable={false}
             />
             <div className="pointer-events-none absolute inset-0 grid place-items-center bg-foreground/10 opacity-0 transition-opacity hover:opacity-100">
-              <span className="inline-flex items-center gap-2 bg-background/90 px-3 py-2 text-xs font-medium text-foreground shadow"><Move className="h-4 w-4" /> Arrastrá para mover</span>
+              <span className="inline-flex items-center gap-2 bg-background/90 px-3 py-2 text-xs font-medium text-foreground shadow"><Move className="h-4 w-4" /> Arrastra para mover</span>
             </div>
           </div>
         </div>

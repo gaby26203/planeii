@@ -876,7 +876,7 @@ function TripHeader({
                               planificadas.
                             </p>
                             <p className="text-xs text-muted-foreground">
-                              El campo VIAJERAS no se modifica. Podés reabrir el viaje en cualquier
+                              El campo VIAJERAS no se modifica. Puedes reabrir el viaje en cualquier
                               momento para volver a base capacidad.
                             </p>
                           </>
@@ -1844,7 +1844,7 @@ function TripCurrencyChip({
               <div className="rounded-md border border-terracotta/40 bg-terracotta/5 p-3 text-sm">
                 <p className="font-medium text-foreground">Este cambio afecta conversiones.</p>
                 <p className="text-muted-foreground mt-1">
-                  Estás cambiando la moneda base o la tasa del viaje. Elegí qué hacer con los costos
+                  Estás cambiando la moneda base o la tasa del viaje. Elige qué hacer con los costos
                   ya cargados:
                 </p>
               </div>
@@ -2064,11 +2064,11 @@ function InlineTimeEditor({
     const parsedStart = parseTimeInput(rawStart);
     const parsedEnd = parseTimeInput(rawEnd);
     if (!parsedStart.ok) {
-      toast.error("Hora de inicio inválida. Probá con formatos como 1pm, 1:30pm o 13:30.");
+      toast.error("Hora de inicio inválida. Prueba con formatos como 1pm, 1:30pm o 13:30.");
       return;
     }
     if (!parsedEnd.ok) {
-      toast.error("Hora de fin inválida. Probá con formatos como 1pm, 1:30pm o 13:30.");
+      toast.error("Hora de fin inválida. Prueba con formatos como 1pm, 1:30pm o 13:30.");
       return;
     }
     const nextStart = parsedStart.value || undefined;
@@ -2640,7 +2640,7 @@ function CostsTab({
     const parsed = hasAmount ? parseFloat(rawAmount) : NaN;
     if (hasAmount && (isNaN(parsed) || parsed < 0)) {
       if (silent) return discard();
-      toast.error("El monto debe ser un número válido (o dejalo vacío)");
+      toast.error("El monto debe ser un número válido (o déjalo vacío)");
       return;
     }
     const timeError = getTimeRangeError(draft.startTime, draft.endTime);
@@ -2659,7 +2659,7 @@ function CostsTab({
       draft.itineraryDay !== "none";
     if (!hasAnyField) {
       if (silent) return discard();
-      toast.error("Completá al menos un campo del costo");
+      toast.error("Completa al menos un campo del costo");
       return;
     }
     const isDraft = !hasAmount;
@@ -2781,7 +2781,7 @@ function CostsTab({
         setEditingAmountId(null);
         return;
       }
-      toast.error("El monto debe ser un número válido (o dejalo vacío)");
+      toast.error("El monto debe ser un número válido (o déjalo vacío)");
       return;
     }
     const isDraft = !hasAmount;
@@ -3607,7 +3607,7 @@ function CostsTab({
                                     addTagStore(tripId, label, colorKey)
                                   }
                                   autoFocus
-                                  placeholder="Descripción (usá / para insertar un tag)"
+                                  placeholder="Descripción (usa / para insertar un tag)"
                                 />
                               ) : (
                                 <div
@@ -4264,7 +4264,7 @@ function EnrolleesTab({
               <CardContent className="p-8 text-center text-muted-foreground">
                 <Users className="h-8 w-8 mx-auto mb-2 opacity-40" />
                 <p className="font-medium">Sin viajeras aún</p>
-                <p className="text-sm mt-1">Inscribí la primera viajera con el botón de arriba.</p>
+                <p className="text-sm mt-1">Inscribe la primera viajera con el botón de arriba.</p>
               </CardContent>
             </Card>
           ) : visibleEnrollees.length === 0 ? (
@@ -4462,7 +4462,7 @@ function AddEnrolleeDialog({
         <DialogHeader>
           <DialogTitle>Inscribir viajera</DialogTitle>
           <DialogDescription>
-            Se creará la viajera al precio del viaje. Elegí cómo va a pagar para generar el plan
+            Se creará la viajera al precio del viaje. Elige cómo va a pagar para generar el plan
             automáticamente.
           </DialogDescription>
         </DialogHeader>
@@ -4637,7 +4637,7 @@ function CreateMissingInstallmentDialog({
           </DialogTitle>
           <DialogDescription>
             Hubo un faltante de {formatUSD(defaultAmount)} que no pudo trasladarse a otra cuota.
-            Creá una cuota nueva para mantener el plan completo.
+            Crea una cuota nueva para mantener el plan completo.
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-3">
@@ -4905,8 +4905,8 @@ function ApplyCreditDialog({
           </DialogTitle>
           <DialogDescription>
             {sourceEnrollee.name} tiene un crédito disponible de{" "}
-            <span className="font-semibold text-chart-3">{formatUSD(available)}</span>. Aplicalo a
-            otro viaje en el que ya está inscrita o reservalo para el próximo viaje futuro.
+            <span className="font-semibold text-chart-3">{formatUSD(available)}</span>. Aplícalo a
+            otro viaje en el que ya está inscrita o resérvalo para el próximo viaje futuro.
           </DialogDescription>
         </DialogHeader>
 
@@ -4926,7 +4926,7 @@ function ApplyCreditDialog({
           <TabsContent value="apply" className="space-y-3 mt-3">
             {!hasCandidates ? (
               <div className="rounded-md border border-dashed border-border/60 p-4 text-center text-xs text-muted-foreground">
-                No hay otras inscripciones con el mismo email y saldo pendiente. Reservá el crédito
+                No hay otras inscripciones con el mismo email y saldo pendiente. Reserva el crédito
                 para que se aplique al próximo viaje en el que se inscriba.
               </div>
             ) : (
@@ -4934,7 +4934,7 @@ function ApplyCreditDialog({
                 <Label className="text-xs">Viaje destino</Label>
                 <Select value={selectedDestKey} onValueChange={setSelectedDestKey}>
                   <SelectTrigger className="h-9 mt-1">
-                    <SelectValue placeholder="Elegí un viaje destino" />
+                    <SelectValue placeholder="Elige un viaje destino" />
                   </SelectTrigger>
                   <SelectContent>
                     {candidates.map((c) => (
@@ -4995,7 +4995,7 @@ function ApplyCreditDialog({
             </div>
             {!validAmount && (
               <p className="text-[10px] text-destructive mt-1">
-                Ingresá un monto entre {formatUSD(0.01)} y {formatUSD(available)}.
+                Ingresa un monto entre {formatUSD(0.01)} y {formatUSD(available)}.
               </p>
             )}
             {validAmount && willOverflow && tab === "apply" && selectedDest && (
@@ -5442,8 +5442,8 @@ function EnrolleeCard({
                 Saldo sin asignar: {formatUSD(enrollee.unassignedBalance ?? 0)}
               </p>
               <p className="text-[11px] text-muted-foreground mt-0.5">
-                Faltante de un abono que no pudo trasladarse a otra cuota. Creá una cuota nueva para
-                cobrarlo o dejalo registrado.
+                Faltante de un abono que no pudo trasladarse a otra cuota. Crea una cuota nueva para
+                cobrarlo o déjalo registrado.
               </p>
             </div>
             <div className="flex gap-1 shrink-0">
@@ -5485,7 +5485,7 @@ function EnrolleeCard({
                   Sobrepago: {formatUSD(enrollee.overpayment ?? 0)}
                 </p>
                 <p className="text-[11px] text-muted-foreground mt-0.5">
-                  La viajera pagó más del total del viaje. Decidí si lo devolvés o lo dejás como
+                  La viajera pagó más del total del viaje. Decide si lo devuelves o lo dejas como
                   crédito a su favor.
                 </p>
                 <div className="flex gap-1.5 mt-2 flex-wrap">
@@ -5593,7 +5593,7 @@ function EnrolleeCard({
                 );
                 setShowCreditDialog(false);
               } else {
-                toast.error("No se pudo aplicar el crédito. Verificá el monto disponible.");
+                toast.error("No se pudo aplicar el crédito. Verifica el monto disponible.");
               }
             }}
             onReserve={(amount, notes) => {
@@ -6677,7 +6677,7 @@ function ExtraFormDialog({
     }
     if (paymentMode === "cuotas") {
       if (installments.length < 1) {
-        toast.error("Necesitás al menos 1 cuota");
+        toast.error("Necesitas al menos 1 cuota");
         return;
       }
       if (Math.abs(installmentsDelta) > 0.05) {
@@ -7459,7 +7459,7 @@ function DeleteEnrolleeDialog({
             (pagos, descuentos, audit log). Esta acción no se puede deshacer.
             <br />
             <br />
-            Si la viajera canceló el viaje, considerá usar <strong>Cancelar inscripción</strong> en
+            Si la viajera canceló el viaje, considera usar <strong>Cancelar inscripción</strong> en
             lugar de eliminar, para conservar el registro.
           </DialogDescription>
         </DialogHeader>
@@ -8172,7 +8172,7 @@ function InstallmentRow({
                 toast.warning(
                   `Cuota ${index} cerrada en ${formatUSD(payment.amount)} · faltante ${formatUSD(shortfall)} sin asignar`,
                   {
-                    description: "Creá una nueva cuota desde el banner amarillo en la ficha.",
+                    description: "Crea una nueva cuota desde el banner amarillo en la ficha.",
                   },
                 );
               }
@@ -8400,7 +8400,7 @@ function AddPaymentDialog({
               className="h-9 mt-1"
             />
             {!valid && parsed <= 0 && amount.trim() !== "" && (
-              <p className="text-[11px] text-destructive mt-1">Ingresá un monto mayor a 0.</p>
+              <p className="text-[11px] text-destructive mt-1">Ingresa un monto mayor a 0.</p>
             )}
             {valid && Math.abs(delta) <= 0.005 && (
               <p className="text-[11px] text-chart-3 mt-1">
@@ -8432,7 +8432,7 @@ function AddPaymentDialog({
                 Comisión Stripe
               </p>
               <p className="text-[10px] text-muted-foreground -mt-1">
-                Fee absorbida por la organizadora. Los presets son atajos; podés editar % y fijo.
+                Fee absorbida por la organizadora. Los presets son atajos; puedes editar % y fijo.
               </p>
               <div>
                 <Label className="text-xs">Descripción / referencia</Label>
@@ -8511,7 +8511,7 @@ function AddPaymentDialog({
                 Comisión (otra pasarela)
               </p>
               <p className="text-[10px] text-muted-foreground -mt-1">
-                Si la pasarela cobra fee y la absorbés vos, indicá descripción, % y fijo. Dejá en 0
+                Si la pasarela cobra fee y la absorbes tú, indica descripción, % y fijo. Deja en 0
                 si no hay comisión.
               </p>
               <div>
@@ -8926,7 +8926,7 @@ function EditPaymentDialog({
             <Pencil className="h-4 w-4 text-chart-3" /> Editar abono
           </DialogTitle>
           <DialogDescription>
-            Cuota {installmentIndex}. Editá monto, método, fecha o notas. Si cambia el monto, la
+            Cuota {installmentIndex}. Edita monto, método, fecha o notas. Si cambia el monto, la
             cuota se cierra al nuevo total y el delta se redistribuye en cuotas pendientes
             posteriores (igual que al registrar un abono nuevo).
           </DialogDescription>
@@ -9119,7 +9119,7 @@ function EditPaymentDialog({
                 Comisión (otra pasarela)
               </p>
               <p className="text-[10px] text-muted-foreground -mt-1">
-                Si la pasarela cobra fee y la absorbés vos, indicá descripción, % y fijo. Dejá en 0
+                Si la pasarela cobra fee y la absorbes tú, indica descripción, % y fijo. Deja en 0
                 si no hay comisión.
               </p>
               <div>

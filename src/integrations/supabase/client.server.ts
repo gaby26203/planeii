@@ -37,7 +37,7 @@ function createSupabaseAdminClient() {
       ...(!SUPABASE_URL ? ['SUPABASE_URL'] : []),
       ...(!SUPABASE_SERVICE_ROLE_KEY ? ['SUPABASE_SERVICE_ROLE_KEY'] : []),
     ];
-    const message = `Missing Supabase environment variable(s): ${missing.join(', ')}. Copiá .env.example a .env y completá las credenciales de tu proyecto Supabase.`;
+    const message = `Missing Supabase environment variable(s): ${missing.join(', ')}. Copia .env.example a .env y completa las credenciales de tu proyecto Supabase.`;
     console.error(`[Supabase] ${message}`);
     throw new Error(message);
   }

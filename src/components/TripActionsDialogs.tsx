@@ -160,7 +160,7 @@ export function DeleteTripDialog({
     try {
       await trashTrip(tripId);
       toast.success("Viaje enviado a la papelera", {
-        description: "Podés recuperarlo durante los próximos 7 días.",
+        description: "Puedes recuperarlo durante los próximos 7 días.",
         action: {
           label: "Restaurar",
           onClick: async () => {
@@ -211,7 +211,7 @@ export function DeleteTripDialog({
 
         <div className="space-y-3">
           <div className="rounded-md border border-destructive/30 bg-destructive/5 p-3 text-sm text-foreground">
-            Escribí <span className="font-semibold">{tripName}</span> para confirmar que querés
+            Escribe <span className="font-semibold">{tripName}</span> para confirmar que quieres
             eliminarlo.
           </div>
           <div className="space-y-1.5">

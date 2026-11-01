@@ -48,7 +48,7 @@ export const generateSalesCopy = createServerFn({ method: "POST" })
     try {
       const result = streamText({
         model: createResponsesModel(config),
-        system: `Sos redactora experta en marketing de viajes grupales para mujeres. Escribí en español neutro textos promocionales para una página de venta. Reglas: título de máximo 12 palabras; subtítulo de 1-2 frases; storyHeading exactamente 2 frases cortas; storyParagraphs exactamente 3 párrafos de 2-4 frases; highlights exactamente 4 (título corto + descripción de 1-2 frases); faq exactamente 5 preguntas frecuentes útiles con respuestas breves; finalHeading una frase de cierre; finalButton 2-4 palabras; finalNote una frase breve. No inventes precios ni datos concretos que no se te dieron.`,
+        system: `Eres redactora experta en marketing de viajes grupales para mujeres. Escribe en español neutro textos promocionales para una página de venta. Reglas: título de máximo 12 palabras; subtítulo de 1-2 frases; storyHeading exactamente 2 frases cortas; storyParagraphs exactamente 3 párrafos de 2-4 frases; highlights exactamente 4 (título corto + descripción de 1-2 frases); faq exactamente 5 preguntas frecuentes útiles con respuestas breves; finalHeading una frase de cierre; finalButton 2-4 palabras; finalNote una frase breve. No inventes precios ni datos concretos que no se te dieron.`,
         prompt,
         output: Output.object({ schema: outputSchema }),
         providerOptions: {
@@ -74,13 +74,13 @@ export const generateSalesCopy = createServerFn({ method: "POST" })
       };
     } catch (error) {
       if (NoObjectGeneratedError.isInstance(error)) {
-        return { ok: false, error: "La IA no devolvió un texto válido. Probá de nuevo." };
+        return { ok: false, error: "La IA no devolvió un texto válido. Prueba de nuevo." };
       }
       const status = APICallError.isInstance(error) ? error.statusCode : undefined;
-      if (status === 429) return { ok: false, error: "Demasiadas solicitudes. Esperá un momento e intentá otra vez." };
-      if (status === 402) return { ok: false, error: "El proveedor de IA no tiene saldo disponible. Revisá la cuenta del proveedor." };
+      if (status === 429) return { ok: false, error: "Demasiadas solicitudes. Espera un momento e intenta otra vez." };
+      if (status === 402) return { ok: false, error: "El proveedor de IA no tiene saldo disponible. Revisa la cuenta del proveedor." };
       if (status === 401 || status === 403) return { ok: false, error: "El proveedor de IA rechazó la clave configurada (AI_API_KEY)." };
       console.error("generateSalesCopy failed", error);
-      return { ok: false, error: "No se pudieron generar los textos. Intentá de nuevo." };
+      return { ok: false, error: "No se pudieron generar los textos. Intenta de nuevo." };
     }
   });

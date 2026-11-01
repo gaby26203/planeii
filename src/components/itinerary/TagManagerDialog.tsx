@@ -259,7 +259,7 @@ export function TagManagerDialog({
               {(() => {
                 const usage = deleteTarget ? usageCounts.get(deleteTarget.id) ?? 0 : 0;
                 if (usage === 0) return "Este tag no está siendo usado en ninguna fila.";
-                return `Este tag está en uso en ${usage} ${usage === 1 ? "fila" : "filas"}. Elegí qué hacer con las apariciones existentes:`;
+                return `Este tag está en uso en ${usage} ${usage === 1 ? "fila" : "filas"}. Elige qué hacer con las apariciones existentes:`;
               })()}
             </AlertDialogDescription>
           </AlertDialogHeader>

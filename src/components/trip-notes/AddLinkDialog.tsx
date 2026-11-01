@@ -58,7 +58,7 @@ export function AddLinkDialog({ open, onOpenChange, onSubmit, initial }: AddLink
         <DialogHeader>
           <DialogTitle>{initial ? "Editar enlace" : "Agregar enlace"}</DialogTitle>
           <DialogDescription>
-            Guardá una URL relacionada con el viaje (docs, reservas, referencias).
+            Guarda una URL relacionada con el viaje (docs, reservas, referencias).
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-3">

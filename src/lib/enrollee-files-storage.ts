@@ -34,7 +34,7 @@ export async function uploadEnrolleeFile(
     throw new Error("El archivo supera los 15 MB.");
   }
   if (file.type && !ACCEPTED_ATTACHMENT_TYPES.includes(file.type)) {
-    throw new Error("Formato no soportado. Usá JPG, PNG, WebP o PDF.");
+    throw new Error("Formato no soportado. Usa JPG, PNG, WebP o PDF.");
   }
   const path = `${tripId}/viajeras/${enrolleeId}/${Date.now()}-${sanitizeName(file.name)}`;
   const { error } = await supabase.storage.from(BUCKET).upload(path, file, {

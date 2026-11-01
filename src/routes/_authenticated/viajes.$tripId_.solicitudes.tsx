@@ -110,7 +110,7 @@ function ApplicationsPage() {
       {apps.isError && <p className="text-sm text-destructive">No se pudieron cargar las solicitudes.</p>}
       {apps.data && list.length === 0 && (
         <div className="rounded-xl border border-dashed p-10 text-center text-sm text-muted-foreground">
-          {apps.data.length === 0 ? (page.data?.form.mode === "internal" && page.data.slug ? `Todavía no llegaron solicitudes. El formulario está en /v/${page.data.slug}/reservar.` : "Todavía no hay solicitudes. Activá el formulario de Planeii en la pestaña Formulario del editor y publicá la página.") : "Ninguna solicitud coincide con el filtro."}
+          {apps.data.length === 0 ? (page.data?.form.mode === "internal" && page.data.slug ? `Todavía no llegaron solicitudes. El formulario está en /v/${page.data.slug}/reservar.` : "Todavía no hay solicitudes. Activa el formulario de Planeii en la pestaña Formulario del editor y publica la página.") : "Ninguna solicitud coincide con el filtro."}
         </div>
       )}
 
@@ -274,7 +274,7 @@ function ApplicationDetail({ app, tripId, tripName, template, onDeleted }: { app
       <div className="space-y-2">
         <p className="text-sm font-semibold">Contactada por</p>
         <Select value={app.contacted_by ?? "none"} onValueChange={(v) => changeContactedBy.mutate(v === "none" ? null : v)} disabled={organizers.isLoading}>
-          <SelectTrigger><SelectValue placeholder="Elegí quién la contactó" /></SelectTrigger>
+          <SelectTrigger><SelectValue placeholder="Elige quién la contactó" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="none">Sin asignar</SelectItem>
             {(organizers.data ?? []).map((o) => <SelectItem key={o.id} value={o.id}>{o.name}</SelectItem>)}

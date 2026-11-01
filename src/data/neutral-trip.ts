@@ -2,7 +2,7 @@
 // para cualquier landing que no sea Oaxaca. Sin contenido real de ningún destino.
 import { BOOKING_URL, type Img, type LandingCopy, type TripData } from "./trip";
 
-const PHOTO_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800"><rect width="1200" height="800" fill="#e7e0d6"/><g fill="none" stroke="#9c9186" stroke-width="6"><rect x="530" y="330" width="140" height="104" rx="10"/><circle cx="600" cy="382" r="26"/></g><text x="600" y="490" font-family="sans-serif" font-size="30" fill="#7d7268" text-anchor="middle">Agregá una foto</text></svg>`;
+const PHOTO_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800"><rect width="1200" height="800" fill="#e7e0d6"/><g fill="none" stroke="#9c9186" stroke-width="6"><rect x="530" y="330" width="140" height="104" rx="10"/><circle cx="600" cy="382" r="26"/></g><text x="600" y="490" font-family="sans-serif" font-size="30" fill="#7d7268" text-anchor="middle">Agrega una foto</text></svg>`;
 export const NEUTRAL_PHOTO_SRC = `data:image/svg+xml;utf8,${encodeURIComponent(PHOTO_SVG)}`;
 
 const photo = (alt: string, caption?: string): Img => ({ src: NEUTRAL_PHOTO_SRC, alt, ...(caption ? { caption } : {}) });
@@ -60,7 +60,7 @@ export const NEUTRAL_TRIP_DATA: TripData = {
   finalImage: photo("Foto de cierre del viaje"),
   story: {
     heading: ["Descripción de tu viaje.", "Lo que lo hace especial."],
-    paragraphs: ["Descripción de tu viaje.", "Contá qué hace especial este viaje.", "Qué se lleva cada viajera al volver."],
+    paragraphs: ["Descripción de tu viaje.", "Cuenta qué hace especial este viaje.", "Qué se lleva cada viajera al volver."],
     image: photo("Foto de la historia del viaje"),
   },
   highlights: [1, 2, 3].map((n) => ({
@@ -90,7 +90,7 @@ export const NEUTRAL_TRIP_DATA: TripData = {
   practicalInfo: [],
   testimonials: [1, 2, 3].map(() => ({ quote: "Testimonio de una viajera.", name: "Nombre", location: "Ciudad, país" })),
   faq: [1, 2, 3].map(() => ({ q: "Pregunta frecuente", a: "Respuesta a la pregunta." })),
-  finalCta: { heading: "Nos vemos en [destino].", button: "Quiero reservar mi lugar", note: "Consultá fechas, disponibilidad y detalles del viaje." },
+  finalCta: { heading: "Nos vemos en [destino].", button: "Quiero reservar mi lugar", note: "Consulta fechas, disponibilidad y detalles del viaje." },
   contact: { email: "", instagram: "", whatsapp: "" },
   copy: NEUTRAL_LANDING_COPY,
 };

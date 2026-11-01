@@ -32,7 +32,7 @@ export const Route = createFileRoute("/api/public/apply")({
         try {
           payload = payloadSchema.parse(await request.json());
         } catch {
-          return fail("Revisá los datos: nombre, WhatsApp con código de país y correo válido.");
+          return fail("Revisa los datos: nombre, WhatsApp con código de país y correo válido.");
         }
         if (payload.website) return Response.json({ ok: true }); // bot: fingimos éxito
 
@@ -42,7 +42,7 @@ export const Route = createFileRoute("/api/public/apply")({
           .select("trip_id, slug, document")
           .eq("slug", payload.slug)
           .maybeSingle();
-        if (pageError) return fail("No se pudo enviar la solicitud. Intentá de nuevo.", 500);
+        if (pageError) return fail("No se pudo enviar la solicitud. Intenta de nuevo.", 500);
         if (!page) return fail("Este viaje no existe.", 404);
 
         const document = normalizeEditorDocument(page.document as unknown as EditorDocument, NEUTRAL_TRIP_DATA);
@@ -99,7 +99,7 @@ export const Route = createFileRoute("/api/public/apply")({
         }).select("id").single();
         if (error || !inserted) {
           console.error("apply insert failed", error);
-          return fail("No se pudo enviar la solicitud. Intentá de nuevo.", 500);
+          return fail("No se pudo enviar la solicitud. Intenta de nuevo.", 500);
         }
 
         // Correos: la solicitud ya quedó guardada; un fallo de envío nunca la afecta.

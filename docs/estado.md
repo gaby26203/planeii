@@ -130,15 +130,12 @@ Ordenado por gravedad.
   extras, créditos y resumen. Cortes naturales: `header/`, `costs/`, `enrollees/` (con
   `payments/`, `extras/`, `credits/`), `summary/`.
 - **Moneda.** Hay unos 164 usos de `formatUSD` frente a 15 de `formatMoney` en ese archivo.
-- **Tests.** Los 7 archivos `*.test.ts` son tests unitarios de funciones puras. El único e2e
-  prueba los horarios de costos y modifica datos reales. No hay cobertura de publicación,
-  formulario público, analítica, correos ni permisos.
+- **Tests.** Los archivos `*.test.ts` son tests unitarios de funciones puras, y el e2e de
+  horarios modifica datos reales. La lista de comprobación de despliegues (`bun run smoke`)
+  recorre ingreso, panel, editor, portadas, papelera y el envío del formulario público contra un
+  despliegue, pero no hay tests de permisos, analítica ni del contenido de los correos.
 - **Código muerto.** `ItineraryTab`, `AutoResizeTextarea`, `seedEnrollee`, `addTripMember`,
   `PracticalInfo`, varios imports sin uso.
-- **Textos en voseo.** Lovable escribió la interfaz en español rioplatense ("tenés", "Revisá",
-  "Elegí"): quedan unas 150 formas en unos 39 archivos de `src/`. El público es venezolano, así
-  que hay que pasarlas a español neutro con tú. Las pantallas de acceso, el panel sin viajes y el
-  selector de portada ya están en tú.
 
 ## Lo que no se pudo verificar
 

@@ -104,7 +104,7 @@ function SettingsPage() {
         <div>
           <h1 className="font-display text-3xl">Plantillas</h1>
           <p className="text-sm text-muted-foreground mt-1 max-w-xl">
-            Estos valores se clonan a cada viaje nuevo. Podés editarlos por viaje sin
+            Estos valores se clonan a cada viaje nuevo. Puedes editarlos por viaje sin
             afectar la plantilla, y los cambios acá no modifican viajes ya creados.
           </p>
         </div>

@@ -160,7 +160,7 @@ export function ProvidersTab({ tripId, providers, costs, trip }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [list, costs, trip, travelers]);
 
-  const readOnlyMsg = "No tenés permiso para editar proveedores.";
+  const readOnlyMsg = "No tienes permiso para editar proveedores.";
 
   return (
     <Card className="mt-4">
@@ -601,7 +601,7 @@ function ProviderDialog({ open, initial, costs, trip, onClose, onSave }: DialogP
               </div>
             )}
             <p className="text-[11px] text-muted-foreground mt-1">
-              Podés vincular varios servicios de un mismo proveedor (ej. Mestizaje = 3 tours). Los
+              Puedes vincular varios servicios de un mismo proveedor (ej. Mestizaje = 3 tours). Los
               montos siguen viviendo en Costos; acá sólo se referencian.
             </p>
           </div>

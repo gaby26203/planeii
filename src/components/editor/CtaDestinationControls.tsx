@@ -50,7 +50,7 @@ export function CtaDestinationControls({ document, ctaId, label, slug, highlight
       {link.target === "section" && (
         <label className="block text-[10px]">Sección
           <Select value={link.sectionId ?? ""} onValueChange={(sectionId) => set({ sectionId })}>
-            <SelectTrigger className="mt-1 h-8 text-xs"><SelectValue placeholder="Elegí una sección" /></SelectTrigger>
+            <SelectTrigger className="mt-1 h-8 text-xs"><SelectValue placeholder="Elige una sección" /></SelectTrigger>
             <SelectContent>
               {document.sectionOrder.map((key) => (
                 <SelectItem key={key} value={key}>{SECTION_LABELS[key as SectionKey] ?? key}{document.hiddenSections.includes(key) ? " (oculta)" : ""}</SelectItem>

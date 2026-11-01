@@ -55,7 +55,7 @@ export function AiCopyDialog({ open, onOpenChange, trip, onApply }: {
     setForm((f) => ({ ...f, [key]: e.target.value }));
 
   const submit = async () => {
-    if (!form.destination.trim()) { setError("Indicá el destino."); return; }
+    if (!form.destination.trim()) { setError("Indica el destino."); return; }
     setLoading(true); setError(null);
     try {
       const res = await generate({ data: form });
@@ -64,7 +64,7 @@ export function AiCopyDialog({ open, onOpenChange, trip, onApply }: {
       toast.success("Textos generados y aplicados a la página");
       onOpenChange(false);
     } catch {
-      setError("No se pudieron generar los textos. Intentá de nuevo.");
+      setError("No se pudieron generar los textos. Intenta de nuevo.");
     } finally {
       setLoading(false);
     }
@@ -75,7 +75,7 @@ export function AiCopyDialog({ open, onOpenChange, trip, onApply }: {
       <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-lg">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2"><Sparkles className="h-4 w-4" /> Generar textos con IA</DialogTitle>
-          <DialogDescription>Contá los detalles del viaje y la IA escribirá el título, la historia, los destacados, preguntas frecuentes y el cierre. Las fotos se mantienen.</DialogDescription>
+          <DialogDescription>Cuenta los detalles del viaje y la IA escribirá el título, la historia, los destacados, preguntas frecuentes y el cierre. Las fotos se mantienen.</DialogDescription>
         </DialogHeader>
         <div className="space-y-3">
           <div className="space-y-1"><Label>Destino</Label><Input value={form.destination} onChange={set("destination")} /></div>
@@ -88,7 +88,7 @@ export function AiCopyDialog({ open, onOpenChange, trip, onApply }: {
           <div className="space-y-1"><Label>Tono</Label><Input value={form.tone} onChange={set("tone")} /></div>
           <div className="space-y-1"><Label>Otros detalles</Label><Textarea rows={2} value={form.extra} onChange={set("extra")} placeholder="Alojamiento, nivel físico, qué la hace única…" /></div>
           {error && <p className="text-sm text-destructive">{error}</p>}
-          <p className="text-xs text-muted-foreground">Esto reemplaza los textos actuales de esas secciones. Podés deshacer restaurando o editándolos después.</p>
+          <p className="text-xs text-muted-foreground">Esto reemplaza los textos actuales de esas secciones. Puedes deshacer restaurando o editándolos después.</p>
         </div>
         <DialogFooter>
           <Button variant="ghost" onClick={() => onOpenChange(false)} disabled={loading}>Cancelar</Button>
