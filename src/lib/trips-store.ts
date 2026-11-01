@@ -198,11 +198,21 @@ export function backfillTripCurrencyFields(trip: TripData): TripData {
   return patched;
 }
 
+/** Último guardado automático que falló. `at` permite volver a avisar si el reintento falla igual. */
+export interface TripSaveError {
+  tripId: string;
+  message: string;
+  at: number;
+}
+
 interface TripsState {
   trips: Record<string, TripData>;
   hydrated: boolean;
   hydrating: boolean;
-  saveError: string | null;
+  /** Se muestra con SaveErrorNotice y se limpia cuando ese viaje vuelve a guardarse bien. */
+  saveError: TripSaveError | null;
+  /** Error de la última carga de viajes. */
+  loadError: string | null;
 
   // ─── Sincronización con Supabase ──────────────────────────────
   /** Carga los viajes visibles al usuario. Idempotente salvo `force`. */
@@ -610,12 +620,13 @@ export const useTripsStore = create<TripsState>()((set, get) => ({
   hydrated: false,
   hydrating: false,
   saveError: null,
+  loadError: null,
 
   hydrateFromSupabase: async (opts) => {
     const force = opts?.force === true;
     if (get().hydrating) return;
     if (!force && get().hydrated) return;
-    set({ hydrating: true, saveError: null });
+    set({ hydrating: true, loadError: null });
     try {
       const rows = await listMyTrips();
       const trips: Record<string, TripData> = {};
@@ -630,7 +641,7 @@ export const useTripsStore = create<TripsState>()((set, get) => ({
             destination: td.destination ?? (row as any).destination ?? "",
             startDate: td.startDate ?? (row as any).startDate ?? "",
             endDate: td.endDate ?? (row as any).endDate ?? "",
-            status: td.status ?? (row as any).status ?? "planificacion",
+            status: td.status ?? (row as any).status ?? "planificando",
           } as TripData);
         }
       }
@@ -666,14 +677,12 @@ export const useTripsStore = create<TripsState>()((set, get) => ({
       }
     } catch (e) {
       console.error("[trips-store] hydrateFromSupabase falló", e);
-      set({
-        hydrating: false,
-        saveError: e instanceof Error ? e.message : "Error al cargar viajes",
-      });
+      set({ hydrating: false, loadError: friendlyError(e, "No se pudieron cargar los viajes.") });
     }
   },
 
-  resetTrips: () => set({ trips: {}, hydrated: false, hydrating: false, saveError: null }),
+  resetTrips: () =>
+    set({ trips: {}, hydrated: false, hydrating: false, saveError: null, loadError: null }),
 
   createTrip: async (trip) => {
     set((state) => ({ trips: { ...state.trips, [trip.id]: trip } }));
@@ -692,10 +701,10 @@ export const useTripsStore = create<TripsState>()((set, get) => ({
       });
     } catch (e) {
       console.error("[trips-store] createTrip falló", e);
-      // Rollback optimista
+      // Rollback optimista. Quien llama muestra el error.
       set((state) => {
         const { [trip.id]: _, ...rest } = state.trips;
-        return { trips: rest, saveError: e instanceof Error ? e.message : "Error al crear viaje" };
+        return { trips: rest };
       });
       throw e;
     }
@@ -3186,6 +3195,10 @@ function enqueueLatestTripSave(tripId: string): Promise<void> {
       const latestTrip = useTripsStore.getState().trips[tripId];
       if (!latestTrip) return;
       await persistTrip(latestTrip);
+      // Se guardó la última versión: el aviso de error de este viaje ya no aplica.
+      if (useTripsStore.getState().saveError?.tripId === tripId) {
+        useTripsStore.setState({ saveError: null });
+      }
       // Aviso en vivo a las demás organizadoras que tienen el viaje abierto.
       if (typeof window !== "undefined") {
         void import("@/hooks/use-trip-activity")
@@ -3231,11 +3244,25 @@ export async function saveTripNow(tripId: string): Promise<void> {
   try {
     await enqueueLatestTripSave(tripId);
   } catch (e) {
-    useTripsStore.setState({
-      saveError: e instanceof Error ? e.message : "Error al guardar",
-    });
+    reportSaveError(tripId, e);
     throw e;
   }
+}
+
+/** Traduce los errores de red más comunes; el resto (permisos, validación) ya viene en español. */
+function friendlyError(e: unknown, fallback: string): string {
+  const raw = e instanceof Error ? e.message : "";
+  if (!raw) return fallback;
+  if (/failed to fetch|network|load failed|timeout/i.test(raw)) {
+    return "Sin conexión con el servidor.";
+  }
+  return raw;
+}
+
+function reportSaveError(tripId: string, e: unknown) {
+  useTripsStore.setState({
+    saveError: { tripId, message: friendlyError(e, "No se pudo guardar."), at: Date.now() },
+  });
 }
 
 if (typeof window !== "undefined") {
@@ -3250,9 +3277,7 @@ if (typeof window !== "undefined") {
           await enqueueLatestTripSave(tripId);
         } catch (e) {
           console.error("[trips-store] auto-save falló", tripId, e);
-          useTripsStore.setState({
-            saveError: e instanceof Error ? e.message : "Error al guardar",
-          });
+          reportSaveError(tripId, e);
         }
       }, 800),
     );

@@ -201,7 +201,7 @@ Antes de la primera corrida, prepara en el proyecto nuevo:
 | Solo `SMOKE_BASE_URL` | Ingreso; rutas internas piden sesión; fotos de marca; la API pública valida y llega a la base; landing inexistente; vista previa de correos cerrada; og:image con la URL pública | No |
 | Más `SMOKE_SLUG` | La landing de prueba carga sin imágenes rotas, con og:image; la página de reserva carga | No |
 | Más `SMOKE_EMAIL` y `SMOKE_PASSWORD` | Login; el panel carga los viajes; abrir un viaje, su editor de página de venta y sus métricas | No |
-| Más `SMOKE_WRITE=1` | Crear un viaje con portada de la galería y recargar; subir una portada al storage y quitarla; mandar el viaje a la papelera y eliminarlo; enviar una solicitud a la landing de prueba | Sí, y lo borra salvo la solicitud |
+| Más `SMOKE_WRITE=1` | Crear un viaje con portada de la galería y recargar; un guardado fallido muestra el aviso y se guarda al reintentar; subir una portada al storage y quitarla; mandar el viaje a la papelera y eliminarlo; enviar una solicitud a la landing de prueba | Sí, y lo borra salvo la solicitud |
 
 Las corridas no suman visitas a las métricas: bloquean `/api/public/track`. Si una prueba de
 escritura falla a la mitad, el viaje `[prueba] …` queda en el panel y hay que borrarlo a mano. La

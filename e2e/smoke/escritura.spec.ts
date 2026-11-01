@@ -1,5 +1,6 @@
 // Comprobaciones que escriben datos (solo con SMOKE_WRITE=1): crea un viaje de prueba con
-// portada, sube un archivo al storage, lo borra todo y envía una solicitud a la landing de prueba.
+// portada, provoca un guardado fallido y lo reintenta, sube un archivo al storage, lo borra todo
+// y envía una solicitud a la landing de prueba.
 // Si una prueba falla a la mitad, el viaje "[prueba] …" queda en el panel y hay que borrarlo a mano.
 
 import path from "node:path";
@@ -37,6 +38,31 @@ test.describe.serial("con escritura", () => {
     await page.reload();
     await expect(page.getByText(tripName).first()).toBeVisible({ timeout: 20_000 });
     await expect(page.locator(`img[src*="${galleryPhoto.src}"]`).first()).toBeVisible();
+  });
+
+  test("avisa si un cambio no se guarda y lo guarda al reintentar", async ({ page }) => {
+    test.skip(!tripPath, "no se creó el viaje");
+    const otherPhoto = BRAND_PHOTOS[1];
+    await login(page);
+    await page.goto(tripPath);
+    await expect(page.getByText(tripName).first()).toBeVisible({ timeout: 20_000 });
+
+    // Corta las server functions para que falle el guardado automático del cambio.
+    await page.route("**/_serverFn/**", (route) => route.abort());
+    await page.getByRole("button", { name: "Cambiar foto" }).click();
+    const dialog = page.getByRole("dialog");
+    await dialog.getByRole("tab", { name: "Galería" }).click();
+    await dialog.getByRole("button", { name: otherPhoto.alt }).click();
+    await dialog.getByRole("button", { name: "Listo" }).click();
+    await expect(page.getByText(/No se guardó el último cambio/)).toBeVisible({ timeout: 20_000 });
+
+    await page.unroute("**/_serverFn/**");
+    await page.getByRole("button", { name: "Reintentar" }).click();
+    await expect(page.getByText("Cambios guardados")).toBeVisible({ timeout: 20_000 });
+    await page.reload();
+    await expect(page.locator(`img[src*="${otherPhoto.src}"]`).first()).toBeVisible({
+      timeout: 20_000,
+    });
   });
 
   test("sube una portada al storage y la quita", async ({ page }) => {

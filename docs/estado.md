@@ -91,7 +91,6 @@ Las notas de costo, que antes se mostraban sin sanear, pasan por `sanitizeNoteHt
 | Área | Problema | Cómo se sabe |
 |---|---|---|
 | Formulario público | El campo trampa anti-spam nunca finge éxito: el esquema lo rechaza antes con 400 | Verificado en `apply.ts` |
-| Guardado del viaje | Los errores de autosave se guardan en `saveError` pero ningún componente los muestra; el cambio se pierde en la siguiente recarga | Leído |
 | Guardado del viaje | Cada carga crea objetos nuevos y puede reprogramar el guardado de todos los viajes; con Realtime podría encadenar recargas | Leído, sin reproducir |
 | Nuevo viaje | El id pre-generado no se regenera al cerrar el diálogo; un segundo viaje sin recargar podría chocar | Leído |
 | Analítica | Los clics de la barra de anuncio nunca se cuentan y "Ver itinerario" cuenta como clic de reserva | Leído |
@@ -99,7 +98,6 @@ Las notas de costo, que antes se mostraban sin sanear, pasan por `sanitizeNoteHt
 | Monedas | Dashboard, Finanzas y viajeras formatean en USD aunque la moneda base sea otra, y el dashboard suma monedas distintas | Leído |
 | Viajeras | Con crédito aplicado, las cuotas se crean por el precio completo | Leído |
 | Itinerario | Título, descripción y actividades del día no se pueden editar, pero las exportaciones los usan | Leído |
-| Estados | Valor por defecto `"planificacion"` no existe (debería ser `planificando`) | Leído |
 | Correo | El correo a la viajera dice "CHAMA VIAJA" para todos los viajes | Leído |
 | Editor | "Descartar" puede volver a una versión vieja si se publicó en la misma sesión | Leído |
 | Base | Borrar solicitudes fallaba por falta de GRANT DELETE | Corregido en la migración nueva |
@@ -147,5 +145,4 @@ Las notas de costo, que antes se mostraban sin sanear, pasan por `sanitizeNoteHt
 1. Completar la puesta en marcha de [migracion.md](migracion.md).
 2. Endurecer la RLS de `trips` y `trip_members` y mover la escritura de analítica solo al
    servidor.
-3. Mostrar los errores de guardado automático.
-4. Formatear todo el repo en un commit aparte y partir `viajes.$tripId.tsx`.
+3. Formatear todo el repo en un commit aparte y partir `viajes.$tripId.tsx`.

@@ -166,13 +166,18 @@ sequenceDiagram
   Q->>SF: persistTrip(trip) serializado por viaje
   SF->>DB: lee trips.data actual
   SF->>SF: loadEffectivePerms + requiredScopes(viejo, nuevo)
-  alt faltan permisos
-    SF-->>S: error (se guarda en saveError, no se muestra)
+  alt faltan permisos o falla la red
+    SF-->>S: error → saveError {tripId, mensaje}
+    S->>UI: SaveErrorNotice: aviso fijo con Reintentar<br/>y confirmación antes de cerrar la página
   else ok
     SF->>DB: UPDATE trips (data + columnas espejo)
+    S->>S: limpia saveError de ese viaje
     S->>RT: notifyTripActivity
   end
 ```
+
+Si falla la carga inicial (`hydrateFromSupabase`), el error queda en `loadError`: el mismo
+componente avisa con Reintentar y el panel muestra el error en lugar de quedar en blanco.
 
 ### 6. Crear y duplicar viaje
 

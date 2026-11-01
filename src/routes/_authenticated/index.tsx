@@ -354,6 +354,7 @@ function TripsPage() {
   const trips = useTripsStore((s) => s.trips);
   const hydrated = useTripsStore((s) => s.hydrated);
   const hydrating = useTripsStore((s) => s.hydrating);
+  const loadError = useTripsStore((s) => s.loadError);
   const { canCreateTrip } = usePermissions();
 
   const cards = useMemo(
@@ -393,6 +394,23 @@ function TripsPage() {
           <Loader2 className="h-4 w-4 animate-spin" />
           Cargando viajes…
         </div>
+      )}
+
+      {!hydrated && !hydrating && loadError && (
+        <Card className="border-destructive/40">
+          <CardContent className="flex flex-col items-start gap-3 p-6 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="font-medium text-foreground">No se pudieron cargar tus viajes</p>
+              <p className="mt-1 text-sm text-muted-foreground">{loadError}</p>
+            </div>
+            <Button
+              variant="outline"
+              onClick={() => void useTripsStore.getState().hydrateFromSupabase({ force: true })}
+            >
+              Reintentar
+            </Button>
+          </CardContent>
+        </Card>
       )}
 
       {hydrated && cards.length === 0 && (

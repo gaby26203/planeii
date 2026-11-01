@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useTripsStore } from "@/lib/trips-store";
 import { acceptMyPendingInvitations } from "@/lib/trip-invitations.functions";
 import { refreshAccess } from "@/lib/access";
+import { SaveErrorNotice } from "@/components/SaveErrorNotice";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
@@ -19,6 +20,7 @@ function AuthenticatedLayout() {
   return (
     <>
       <TripsSyncer />
+      <SaveErrorNotice />
       <Outlet />
     </>
   );
