@@ -67,31 +67,30 @@ Ordenado por gravedad.
    papelera con `purgeAt` vencido, y la próxima carga de la owner lo borraría en duro.
 4. **El permiso de finanzas solo oculta la interfaz.** Leído: `listMyTrips` devuelve el JSON
    completo, con finanzas y datos personales de viajeras, a cualquier miembro.
-5. **XSS almacenado en notas de costo.** Verificado: `CostNoteEditor.tsx` muestra el HTML guardado
-   con `dangerouslySetInnerHTML` sin sanear. Combinado con el punto 1, cualquier miembro puede
-   inyectar HTML que se ejecuta en la sesión de otra persona del equipo.
-6. **Analítica falsificable.** Leído: `anon` puede insertar en `trip_page_events` con cualquier
+5. **Analítica falsificable.** Leído: `anon` puede insertar en `trip_page_events` con cualquier
    `trip_id` directamente por PostgREST, sin límite de frecuencia y saltando el filtro del
    equipo de `/api/public/track`.
-7. **Landings listables.** Leído: `trip_pages` tiene SELECT abierto a `anon`, así que se pueden
+6. **Landings listables.** Leído: `trip_pages` tiene SELECT abierto a `anon`, así que se pueden
    listar todas las páginas con su `owner_id` y `trip_id`.
-8. **Canal de actividad público.** Leído: `trip-activity:<tripId>` es un canal broadcast sin
+7. **Canal de actividad público.** Leído: `trip-activity:<tripId>` es un canal broadcast sin
    autorización; quien conozca un id puede escuchar o enviar avisos falsos.
-9. **Aceptar invitaciones depende de que Supabase confirme el email.** Leído: se compara
+8. **Aceptar invitaciones depende de que Supabase confirme el email.** Leído: se compara
    `claims.email` sin mirar `email_verified`. En el proyecto Supabase nuevo hay que dejar activa
    la confirmación de email; si no, alguien podría registrarse con el email invitado de otra
    persona.
-10. **Otros menores.** Leído: cada usuaria puede editar su `profiles.email` (que se usa para los
-    avisos de solicitudes); `generateSalesCopy` solo exige sesión y el registro está abierto;
-    `/api/public/page-image/*` sirve cualquier ruta válida del bucket aunque la página no esté
-    publicada; `has_role` permite averiguar quién es owner.
+9. **Otros menores.** Leído: cada usuaria puede editar su `profiles.email` (que se usa para los
+   avisos de solicitudes); `generateSalesCopy` solo exige sesión y el registro está abierto;
+   `/api/public/page-image/*` sirve cualquier ruta válida del bucket aunque la página no esté
+   publicada; `has_role` permite averiguar quién es owner.
+
+Las notas de costo, que antes se mostraban sin sanear, pasan por `sanitizeNoteHtml`
+(`src/lib/sanitize-note-html.ts`): solo quedan etiquetas de formato y enlaces http, https o mailto.
 
 ## Bugs
 
 | Área | Problema | Cómo se sabe |
 |---|---|---|
 | Formulario público | El campo trampa anti-spam nunca finge éxito: el esquema lo rechaza antes con 400 | Verificado en `apply.ts` |
-| Notas de costo | HTML sin sanear (ver Seguridad 5) | Verificado |
 | Guardado del viaje | Los errores de autosave se guardan en `saveError` pero ningún componente los muestra; el cambio se pierde en la siguiente recarga | Leído |
 | Guardado del viaje | Cada carga crea objetos nuevos y puede reprogramar el guardado de todos los viajes; con Realtime podría encadenar recargas | Leído, sin reproducir |
 | Nuevo viaje | El id pre-generado no se regenera al cerrar el diálogo; un segundo viaje sin recargar podría chocar | Leído |
@@ -150,7 +149,7 @@ Ordenado por gravedad.
 ## Próximos pasos recomendados
 
 1. Completar la puesta en marcha de [migracion.md](migracion.md).
-2. Endurecer la RLS de `trips` y `trip_members`, sanear el HTML de notas y mover la escritura de
-   analítica solo al servidor.
+2. Endurecer la RLS de `trips` y `trip_members` y mover la escritura de analítica solo al
+   servidor.
 3. Mostrar los errores de guardado automático.
 4. Formatear todo el repo en un commit aparte y partir `viajes.$tripId.tsx`.

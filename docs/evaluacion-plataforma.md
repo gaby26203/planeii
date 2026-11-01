@@ -119,12 +119,12 @@ Ordenado por lo que bloquea primero.
 1. **No existe el concepto de organización.** Todo gira alrededor de un rol global `owner` que ve
    y gestiona todos los viajes. Se consulta en unas 60 líneas de 13 archivos y aparece 29 veces en las
    migraciones de la base.
-   Una persona que se registra sin invitación ve "Todavía no tenés viajes asignados" y no puede
+   Una persona que se registra sin invitación ve "Todavía no tienes viajes asignados" y no puede
    crear nada (`src/lib/access.tsx`, `createTrip` en `src/lib/trips.functions.ts`). Con varias
    organizadoras, ese rol global vería los datos de todas.
 2. **La base de datos no hace cumplir los permisos.** Cualquier miembro de un viaje puede escribir
    la fila completa directamente, saltándose los permisos finos que solo revisa una server
-   function. Hay además XSS almacenado en notas de costo. Dentro de un equipo es un riesgo; entre
+   function. Dentro de un equipo es un riesgo; entre
    organizaciones distintas sería una filtración. Detalle en [estado.md](estado.md#seguridad).
 3. **Todo el evento vive en un JSON y la lógica de dinero corre en el navegador.** Viajeras,
    cuotas, pagos, costos y proveedores van en `trips.data`. Las 103 acciones del store calculan

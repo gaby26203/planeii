@@ -5,6 +5,7 @@ import Link from "@tiptap/extension-link";
 import { useEffect, useState } from "react";
 import { Bold as BoldIcon, Link2, Link2Off } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { sanitizeNoteHtml } from "@/lib/sanitize-note-html";
 
 interface CostNoteEditorProps {
   value: string;
@@ -229,7 +230,8 @@ export function CostNoteEditor({
 
 /**
  * Read-only renderer for a cost note. Renders HTML (including bold/links)
- * if present, otherwise renders plain text (legacy values).
+ * if present, otherwise renders plain text (legacy values). The HTML always goes through
+ * sanitizeNoteHtml: the stored value can come from any write to `trips.data`.
  */
 export function CostNoteDisplay({
   value,
@@ -265,7 +267,7 @@ export function CostNoteDisplay({
         if (target.closest("a")) return;
         onClick?.();
       }}
-      dangerouslySetInnerHTML={{ __html: text }}
+      dangerouslySetInnerHTML={{ __html: sanitizeNoteHtml(text) }}
     />
   );
 }

@@ -213,7 +213,7 @@ Pestaña "Itinerario & Costos" (`CostsTab` en `viajes.$tripId.tsx`). Todo vive e
 ```mermaid
 flowchart LR
   E["Editar fila, celda, horario,<br/>ciudad del día, tags"] --> S["Store: updateCost, setCosts,<br/>setItineraryDayCity, addTag…"]
-  N["Nota de costo<br/>CostNoteEditor (Tiptap, HTML)"] --> S
+  N["Nota de costo<br/>CostNoteEditor (Tiptap, HTML)<br/>se muestra saneada"] --> S
   H["Deshacer / rehacer<br/>use-costs-history (memoria)"] --> S
   S --> G["Guardado del viaje (flujo 5)<br/>scopes editar_costos / editar_itinerario"]
 ```
