@@ -22,6 +22,15 @@ test("las páginas internas piden sesión", async ({ page }) => {
   await expect(page).toHaveURL(/\/auth/);
 });
 
+test("nueva contraseña con un enlace vencido ofrece pedir uno nuevo", async ({ page }) => {
+  await page.goto("/reset-password#error=access_denied&error_code=otp_expired");
+  await expect(page.getByRole("button", { name: "Enviar un enlace nuevo" })).toBeVisible();
+  await page.goto("/reset-password");
+  await expect(page.getByRole("button", { name: "Enviar un enlace nuevo" })).toBeVisible({
+    timeout: 15_000,
+  });
+});
+
 test("las fotos de marca se sirven", async ({ request }) => {
   for (const path of ["/brand/fotos/og.jpg", "/brand/fotos/rio-tepuyes.jpg"]) {
     const res = await request.get(path);

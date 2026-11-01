@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Lock, Loader2 } from "lucide-react";
+import { Lock, Loader2, Mail } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,23 +13,63 @@ export const Route = createFileRoute("/reset-password")({
   component: ResetPasswordPage,
 });
 
+type LinkStatus = "checking" | "ready" | "invalid";
+
+/** Supabase devuelve los errores del enlace (vencido, ya usado) en el hash o en la query. */
+function linkErrorFromUrl(): string | null {
+  const query = new URLSearchParams(window.location.search);
+  const hash = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+  return hash.get("error_code") ?? query.get("error_code") ?? hash.get("error") ?? query.get("error");
+}
+
 function ResetPasswordPage() {
   const navigate = useNavigate();
-  const [ready, setReady] = useState(false);
+  const [status, setStatus] = useState<LinkStatus>("checking");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [loading, setLoading] = useState(false);
+  const [email, setEmail] = useState("");
+  const [sending, setSending] = useState(false);
+  const [sent, setSent] = useState(false);
 
   useEffect(() => {
-    // Supabase parsea el hash automáticamente y dispara PASSWORD_RECOVERY.
+    const markInvalid = () => setStatus((s) => (s === "checking" ? "invalid" : s));
+    if (linkErrorFromUrl()) {
+      setStatus("invalid");
+      return;
+    }
+    // Supabase procesa el enlace al iniciar el cliente y dispara PASSWORD_RECOVERY. getSession
+    // espera ese proceso: sin sesión al terminar, el enlace venció, ya se usó o no hay enlace.
     const { data: sub } = supabase.auth.onAuthStateChange((event) => {
-      if (event === "PASSWORD_RECOVERY" || event === "SIGNED_IN") setReady(true);
+      if (event === "PASSWORD_RECOVERY" || event === "SIGNED_IN") setStatus("ready");
     });
-    supabase.auth.getSession().then(({ data }) => {
-      if (data.session) setReady(true);
-    });
-    return () => sub.subscription.unsubscribe();
+    supabase.auth
+      .getSession()
+      .then(({ data }) => (data.session ? setStatus("ready") : markInvalid()))
+      .catch(markInvalid);
+    const timer = setTimeout(markInvalid, 10_000);
+    return () => {
+      sub.subscription.unsubscribe();
+      clearTimeout(timer);
+    };
   }, []);
+
+  async function handleResend(e: React.FormEvent) {
+    e.preventDefault();
+    if (!email.trim()) return;
+    setSending(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      if (error) throw error;
+      setSent(true);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "No se pudo enviar el enlace.");
+    } finally {
+      setSending(false);
+    }
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -61,13 +101,47 @@ function ResetPasswordPage() {
           <div className="mb-6 text-center">
             <h1 className="font-display text-xl font-semibold">Nueva contraseña</h1>
             <p className="text-xs text-muted-foreground mt-1">
-              {ready
+              {status === "ready"
                 ? "Elige una nueva contraseña para tu cuenta"
-                : "Validando link de recuperación..."}
+                : status === "invalid"
+                  ? "Este enlace de recuperación no es válido o ya venció."
+                  : "Validando el enlace de recuperación…"}
             </p>
           </div>
 
-          {ready ? (
+          {status === "invalid" ? (
+            sent ? (
+              <p className="py-2 text-center text-sm text-foreground" role="status">
+                Te enviamos un enlace nuevo a <span className="font-medium">{email.trim()}</span>.
+                Revisa tu correo.
+              </p>
+            ) : (
+              <form onSubmit={handleResend} className="space-y-4">
+                <p className="text-sm text-muted-foreground">
+                  Escribe tu correo y te enviamos uno nuevo.
+                </p>
+                <div className="space-y-1.5">
+                  <Label htmlFor="reset-email">Email</Label>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="reset-email"
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="pl-9"
+                      autoComplete="email"
+                      required
+                    />
+                  </div>
+                </div>
+                <Button type="submit" className="w-full" disabled={sending}>
+                  {sending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  Enviar un enlace nuevo
+                </Button>
+              </form>
+            )
+          ) : status === "ready" ? (
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-1.5">
                 <Label htmlFor="password">Nueva contraseña</Label>

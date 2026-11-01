@@ -100,7 +100,9 @@ todas las invitaciones pendientes del email de la sesión. Las invitaciones no s
 correo: la owner copia el enlace.
 
 Reset de contraseña: `resetPasswordForEmail` con `redirectTo=/reset-password`, que espera el
-evento `PASSWORD_RECOVERY` y llama a `updateUser({ password })`.
+evento `PASSWORD_RECOVERY` y llama a `updateUser({ password })`. Si el enlace trae un error
+(vencido o ya usado) o `getSession` termina sin sesión, la pantalla ofrece pedir un enlace nuevo
+con el mismo `resetPasswordForEmail`.
 
 ### 3. Gestión de accesos (owner)
 

@@ -101,7 +101,6 @@ Las notas de costo, que antes se mostraban sin sanear, pasan por `sanitizeNoteHt
 | Itinerario | Título, descripción y actividades del día no se pueden editar, pero las exportaciones los usan | Leído |
 | Estados | Valor por defecto `"planificacion"` no existe (debería ser `planificando`) | Leído |
 | Correo | El correo a la viajera dice "CHAMA VIAJA" para todos los viajes | Leído |
-| Contraseña | Con un enlace de recuperación vencido, `/reset-password` queda cargando para siempre | Leído |
 | Editor | "Descartar" puede volver a una versión vieja si se publicó en la misma sesión | Leído |
 | Base | Borrar solicitudes fallaba por falta de GRANT DELETE | Corregido en la migración nueva |
 | Base | La suscripción Realtime a `user_roles` nunca recibía eventos | Corregido en la migración nueva |
