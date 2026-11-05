@@ -20,6 +20,7 @@ import {
 } from "./tags";
 import type { TripTag } from "./tags";
 import { copyTripCover, deleteTripCoverRef, isStoragePath } from "./trip-cover-storage";
+import { backfillTripCurrencyFields } from "./trip-backfill";
 
 import type {
   AppliedCredit,
@@ -46,13 +47,11 @@ import {
   computeFinalPrice,
   computePaymentNet,
   convertAmount,
-  EXCHANGE_RATES,
   formatUSD,
   generateId,
   getTripBaseCurrency,
   methodSupportsFee,
   PAYMENT_METHOD_LABELS,
-  suggestLocalCurrency,
 } from "./finance-types";
 import type { Currency } from "./finance-types";
 import {
@@ -142,61 +141,8 @@ function appendAudit(
 
 // (Sin seed en memoria: los viajes se cargan desde Supabase al iniciar sesión.)
 
-// ─── Multimoneda: backfill al hidratar ───────────────────────────
-// Rellena los campos nuevos de trazabilidad para viajes/costos existentes
-// que fueron guardados antes de la v2 de multimoneda. NO altera montos ni
-// cálculos: reconstruye `originalAmount/currency`, `baseCurrency`, `rateUsed`
-// y `convertedAmount` desde `amount`, `currency` y `amountUSD` usando la
-// tabla estática `EXCHANGE_RATES`. Silencioso, idempotente.
-export function backfillTripCurrencyFields(trip: TripData): TripData {
-  const base = getTripBaseCurrency(trip);
-  const local =
-    trip.localCurrency ?? suggestLocalCurrency(trip.country, trip.destination) ?? undefined;
-  const localRate =
-    trip.exchangeRate ?? (local ? EXCHANGE_RATES[local] / EXCHANGE_RATES[base] : undefined);
-  const patched: TripData = {
-    ...trip,
-    baseCurrency: base,
-    localCurrency: local,
-    exchangeRate: localRate,
-    exchangeRateUpdatedAt: trip.exchangeRateUpdatedAt,
-    costs: (trip.costs ?? []).map((c) => {
-      // Migración silenciosa: time (legacy) → startTime.
-      const startTime = c.startTime ?? c.time;
-      if (c.isDraft) {
-        return startTime !== c.startTime ? { ...c, startTime } : c;
-      }
-      const needsCurrencyBackfill = !(
-        c.originalAmount != null &&
-        c.convertedAmount != null &&
-        c.rateUsed != null
-      );
-      if (!needsCurrencyBackfill && startTime === c.startTime) return c;
-      const orig = c.amount;
-      const origCur = c.currency;
-      // Tasa histórica implícita: convertedAmount = orig * rate(base per orig).
-      // Se calcula desde EXCHANGE_RATES (vía USD como pivot).
-      const fromUsd = EXCHANGE_RATES[origCur] ?? 1;
-      const toUsd = EXCHANGE_RATES[base] ?? 1;
-      const rate = toUsd > 0 ? fromUsd / toUsd : 1;
-      const converted = Math.round(orig * rate * 100) / 100;
-      return {
-        ...c,
-        startTime,
-        ...(needsCurrencyBackfill
-          ? {
-              originalAmount: c.originalAmount ?? orig,
-              originalCurrency: c.originalCurrency ?? origCur,
-              baseCurrency: c.baseCurrency ?? base,
-              rateUsed: c.rateUsed ?? rate,
-              convertedAmount: c.convertedAmount ?? converted,
-            }
-          : {}),
-      };
-    }),
-  };
-  return patched;
-}
+// El backfill de multimoneda vive en trip-backfill.ts: el servidor lo usa al comparar cambios.
+export { backfillTripCurrencyFields };
 
 /** Último guardado automático que falló. `at` permite volver a avisar si el reintento falla igual. */
 export interface TripSaveError {

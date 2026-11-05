@@ -198,8 +198,8 @@ Además, sin relación declarada:
   a `trip-covers`, a una URL externa o a una foto de marca de `public/brand/fotos/`; las imágenes dentro de `trip_pages.document` a `trip-page-images`.
 
 Todas las migraciones están en `supabase/migrations/` y se aplican en orden con
-`supabase db push`. La última, `20261015120000_self_hosting_storage_and_grants.sql`, crea lo que
-en Lovable se configuró fuera de los archivos.
+`supabase db push`. `20261015120000_self_hosting_storage_and_grants.sql` crea lo que en Lovable se
+configuró fuera de los archivos; las posteriores cierran permisos (ver [estado.md](estado.md)).
 
 ## 4. Modelo de permisos
 
@@ -216,12 +216,15 @@ flowchart LR
 
   ORGA & TL --> CHK["Dónde se comprueba"]
   CHK --> C1["Cliente: AccessGate, usePermissions<br/>(solo oculta UI)"]
-  CHK --> C2["Servidor: updateTripData compara<br/>JSON viejo vs nuevo (requiredScopes)"]
-  CHK --> C3["RLS: solo distingue miembro / dueña / owner"]
+  CHK --> C2["Servidor: updateTripData compara<br/>JSON viejo vs nuevo (requiredWriteScopes)<br/>y escribe con service role"]
+  CHK --> C3["RLS: lectura por miembro / dueña / owner;<br/>sin UPDATE directo de trips"]
 ```
 
-Los 8 permisos finos están en `src/lib/trip-permissions.ts`. La base de datos no los conoce:
-solo los aplica `updateTripData`. Ver los riesgos que esto abre en [estado.md](estado.md).
+Los 8 permisos finos están en `src/lib/trip-permissions.ts`. La base de datos no los conoce: los
+aplica `updateTripData` con la regla de `src/lib/trip-write-scopes.ts`, donde cada campo del viaje
+tiene un permiso declarado y uno sin declarar, igual que la papelera, solo lo cambia el owner. Como
+la base no acepta UPDATE de `trips` con la sesión de la usuaria, nadie puede saltarse esa regla
+con la clave pública. Ver los riesgos que siguen abiertos en [estado.md](estado.md).
 
 ## 5. Despliegue
 

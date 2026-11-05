@@ -150,7 +150,8 @@ sequenceDiagram
 
 ### 5. Guardado del viaje (autosave)
 
-Todo cambio de `trips.data` pasa por aquí (`trips-store.ts`, `trips.functions.ts`).
+Todo cambio de `trips.data` pasa por aquí (`trips-store.ts`, `trips.functions.ts`). La base no
+acepta UPDATE de `trips` con la sesión de la usuaria: solo escribe el servidor, después de validar.
 
 ```mermaid
 sequenceDiagram
@@ -164,13 +165,13 @@ sequenceDiagram
   S->>S: set() + auditLog dentro del JSON
   S->>Q: suscriptor detecta cambio → espera 800 ms<br/>(saveTripNow la salta)
   Q->>SF: persistTrip(trip) serializado por viaje
-  SF->>DB: lee trips.data actual
-  SF->>SF: loadEffectivePerms + requiredScopes(viejo, nuevo)
+  SF->>DB: lee trips.data actual (sesión de la usuaria, RLS)
+  SF->>SF: loadEffectivePerms + requiredWriteScopes(viejo, nuevo)<br/>campo sin regla o papelera → solo owner
   alt faltan permisos o falla la red
     SF-->>S: error → saveError {tripId, mensaje}
     S->>UI: SaveErrorNotice: aviso fijo con Reintentar<br/>y confirmación antes de cerrar la página
   else ok
-    SF->>DB: UPDATE trips (data + columnas espejo)
+    SF->>DB: UPDATE trips con service role<br/>(data + columnas espejo sacadas del JSON)
     S->>S: limpia saveError de ese viaje
     S->>RT: notifyTripActivity
   end

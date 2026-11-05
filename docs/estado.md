@@ -12,9 +12,9 @@ La app compila, pasa el typecheck y sus tests unitarios. Funcionalmente está ma
 el espacio de trabajo de cada viaje (costos, viajeras, pagos, notas) y el editor de páginas de
 venta con su formulario público. Cinco de las once secciones del menú están vacías.
 
-Los problemas más serios no son de build sino de **seguridad en la base de datos**: los permisos
-finos por miembro solo se aplican en una server function, y las políticas RLS dejan a cualquier
-miembro de un viaje escribir la fila completa directamente.
+Los problemas más serios no son de build sino de **seguridad en la base de datos**. Los viajes ya
+solo se guardan a través del servidor, que valida los permisos finos de cada miembro, pero otras
+tablas, como `trip_members`, todavía aceptan escrituras directas que el servidor no permitiría.
 
 | Comprobación | Exportación de Lovable | Versión migrada |
 |---|---|---|
@@ -25,7 +25,7 @@ miembro de un viaje escribir la fila completa directamente.
 | Tests unitarios (`bun test`) | 37 pasan | 37 pasan |
 | Test e2e de Playwright | Requiere sesión de Lovable o login; el selector del botón no coincidía | Selector corregido; requiere servidor, sesión y un viaje real |
 | ESLint | 3.463 problemas | 3.375 problemas |
-| Migraciones sobre Postgres 16 limpio | Dos carpetas, sin buckets ni algunos permisos | 31 migraciones aplicadas en orden, buckets y permisos incluidos |
+| Migraciones sobre Postgres 16 limpio | Dos carpetas, sin buckets ni algunos permisos | Todas las migraciones aplicadas en orden, buckets y permisos incluidos |
 
 Desglose de ESLint en la versión migrada:
 
@@ -54,34 +54,33 @@ El formato se arregla con `bun run format`, conviene hacerlo en un commit aparte
 
 Ordenado por gravedad.
 
-1. **Cualquier miembro puede escribir la fila completa de un viaje.** Verificado en
-   `supabase/migrations/20260716031213_…sql`: la política de UPDATE de `trips` acepta a
-   cualquier miembro y el GRANT de UPDATE cubre todas las columnas. Un tour leader puede, con la
-   clave pública y su JWT, cambiar `data` sin pasar por `updateTripData` e incluso poner su
-   propio `owner_id`, con lo que pasa a cumplir la política de DELETE.
-2. **Las organizadoras pueden gestionar miembros desde la base.** Leído: las server functions
+1. **Las organizadoras pueden gestionar miembros desde la base.** Leído: las server functions
    exigen owner global, pero la RLS de `trip_members` permite a organizadoras insertar, editar
    permisos y borrar miembros. Esos cambios no quedan en `access_audit_log`.
-3. **`requiredScopes` no cubre todos los campos.** Leído: no revisa `isDeleted`, `purgeAt`,
-   `coverImage`, monedas, `country` ni `tags`. Un miembro sin permisos podría marcar un viaje en
-   papelera con `purgeAt` vencido, y la próxima carga de la owner lo borraría en duro.
-4. **El permiso de finanzas solo oculta la interfaz.** Leído: `listMyTrips` devuelve el JSON
+2. **El permiso de finanzas solo oculta la interfaz.** Leído: `listMyTrips` devuelve el JSON
    completo, con finanzas y datos personales de viajeras, a cualquier miembro.
-5. **Analítica falsificable.** Leído: `anon` puede insertar en `trip_page_events` con cualquier
+3. **Analítica falsificable.** Leído: `anon` puede insertar en `trip_page_events` con cualquier
    `trip_id` directamente por PostgREST, sin límite de frecuencia y saltando el filtro del
    equipo de `/api/public/track`.
-6. **Landings listables.** Leído: `trip_pages` tiene SELECT abierto a `anon`, así que se pueden
+4. **Landings listables.** Leído: `trip_pages` tiene SELECT abierto a `anon`, así que se pueden
    listar todas las páginas con su `owner_id` y `trip_id`.
-7. **Canal de actividad público.** Leído: `trip-activity:<tripId>` es un canal broadcast sin
+5. **Canal de actividad público.** Leído: `trip-activity:<tripId>` es un canal broadcast sin
    autorización; quien conozca un id puede escuchar o enviar avisos falsos.
-8. **Aceptar invitaciones depende de que Supabase confirme el email.** Leído: se compara
+6. **Aceptar invitaciones depende de que Supabase confirme el email.** Leído: se compara
    `claims.email` sin mirar `email_verified`. En el proyecto Supabase nuevo hay que dejar activa
    la confirmación de email; si no, alguien podría registrarse con el email invitado de otra
    persona.
-9. **Otros menores.** Leído: cada usuaria puede editar su `profiles.email` (que se usa para los
+7. **Otros menores.** Leído: cada usuaria puede editar su `profiles.email` (que se usa para los
    avisos de solicitudes); `generateSalesCopy` solo exige sesión y el registro está abierto;
    `/api/public/page-image/*` sirve cualquier ruta válida del bucket aunque la página no esté
    publicada; `has_role` permite averiguar quién es owner.
+
+Ya corregido: los viajes solo se actualizan desde `updateTripData`, que escribe con la clave de
+servicio después de validar (`20261105120000_trips_write_via_server.sql`). Antes, cualquier
+miembro podía cambiar la fila completa con su sesión, incluso ponerse como `owner_id` y borrar el
+viaje; se comprobó con PostgREST sobre las migraciones anteriores. La regla de permisos
+(`src/lib/trip-write-scopes.ts`) ahora cubre todos los campos: la papelera y cualquier campo sin
+regla declarada son solo del owner.
 
 Las notas de costo, que antes se mostraban sin sanear, pasan por `sanitizeNoteHtml`
 (`src/lib/sanitize-note-html.ts`): solo quedan etiquetas de formato y enlaces http, https o mailto.
@@ -143,6 +142,5 @@ Las notas de costo, que antes se mostraban sin sanear, pasan por `sanitizeNoteHt
 ## Próximos pasos recomendados
 
 1. Completar la puesta en marcha de [migracion.md](migracion.md).
-2. Endurecer la RLS de `trips` y `trip_members` y mover la escritura de analítica solo al
-   servidor.
+2. Endurecer la RLS de `trip_members` y mover la escritura de analítica solo al servidor.
 3. Formatear todo el repo en un commit aparte y partir `viajes.$tripId.tsx`.
