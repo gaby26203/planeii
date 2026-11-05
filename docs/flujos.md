@@ -405,12 +405,12 @@ sequenceDiagram
   participant W as Worker /v/$slug
   E->>E: saveNow()
   E->>PD: PrePublishChecklist (avisa, no bloquea)
-  PD->>DB: slug libre en trip_pages
+  PD->>DB: rpc is_trip_page_slug_available(slug, tripId)
   PD->>PD: externalizeDocumentImages
   PD->>DB: UPDATE o INSERT trip_pages (document, published_at)
   PD->>DB: recordPageVersion (recorta a 20) + clearPageDraft
   V->>W: GET /v/$slug
-  W->>DB: REST trip_pages?slug=eq.… con clave publicable
+  W->>DB: rpc get_published_page(slug) con clave publicable<br/>(la tabla no se puede listar sin sesión)
   W->>W: normalizeEditorDocument + resolveTemplateAssets
   W-->>V: SSR de TripLanding + og:image
 ```
@@ -505,7 +505,9 @@ sequenceDiagram
     T->>DB: ¿dueña u organizadora del viaje?
     T-->>P: 202 y descarta
   end
-  T->>DB: INSERT trip_page_events (+ país de cf-ipcountry)
+  Note over T: antes de todo, límite por IP y viaje<br/>(40 cada 5 min) → 429
+  T->>DB: ¿el viaje tiene página publicada? si no, 404
+  T->>DB: INSERT trip_page_events con service role (+ país de cf-ipcountry)
   M->>DB: getTripPageMetrics: últimos 30 días (máx. 5000)<br/>+ conteo de trip_applications
 ```
 

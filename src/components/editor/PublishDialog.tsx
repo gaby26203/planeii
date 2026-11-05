@@ -54,8 +54,9 @@ export function PublishDialog({ open, onOpenChange, document, tripId, onPublishe
     if (clean.length < 3) return setAvailability("short");
     setAvailability("checking");
     const timer = window.setTimeout(async () => {
-      const { data } = await supabase.from("trip_pages").select("trip_id").eq("slug", clean).maybeSingle();
-      setAvailability(data && data.trip_id !== tripId ? "taken" : "available");
+      // El equipo no ve las páginas de otros viajes: la base responde si el slug está libre.
+      const { data: free } = await supabase.rpc("is_trip_page_slug_available", { _slug: clean, _trip_id: tripId });
+      setAvailability(free === false ? "taken" : "available");
     }, 400);
     return () => window.clearTimeout(timer);
   }, [slug, open, tripId]);
@@ -67,9 +68,9 @@ export function PublishDialog({ open, onOpenChange, document, tripId, onPublishe
     setBusy(true);
     setMessage(null);
     try {
-      const { data: bySlug, error: slugError } = await supabase.from("trip_pages").select("trip_id").eq("slug", clean).maybeSingle();
+      const { data: free, error: slugError } = await supabase.rpc("is_trip_page_slug_available", { _slug: clean, _trip_id: tripId });
       if (slugError) throw slugError;
-      if (bySlug && bySlug.trip_id !== tripId) return setMessage("Esa dirección ya está en uso. Prueba otra.");
+      if (free === false) return setMessage("Esa dirección ya está en uso. Prueba otra.");
       const { data: existing, error: existingError } = await supabase.from("trip_pages").select("id").eq("trip_id", tripId).maybeSingle();
       if (existingError) throw existingError;
       const doc = await externalizeDocumentImages(tripId, document);
