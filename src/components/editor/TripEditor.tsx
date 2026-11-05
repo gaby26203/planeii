@@ -199,6 +199,9 @@ export function TripEditor({ tripId, initialTrip, publishedDocument, backHref }:
   const previewRef = useRef<HTMLIFrameElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
   const docRef = useRef(document);
+  // Última versión publicada. La prop solo trae la de la carga: si se publica en esta sesión,
+  // "Descartar" tiene que volver a lo recién publicado y no a la versión anterior.
+  const publishedRef = useRef<EditorDocument | null>(publishedDocument ?? null);
   const undoStack = useRef<EditorDocument[]>([]);
   const redoStack = useRef<EditorDocument[]>([]);
 
@@ -491,7 +494,8 @@ export function TripEditor({ tripId, initialTrip, publishedDocument, backHref }:
 
   const discardChanges = () => {
     if (!window.confirm("¿Descartar los cambios sin publicar y volver a la última versión publicada?")) return;
-    const base = publishedDocument ? normalizeEditorDocument(publishedDocument, fresh().trip) : fresh();
+    const published = publishedRef.current;
+    const base = published ? normalizeEditorDocument(published, fresh().trip) : fresh();
     undoStack.current = [];
     redoStack.current = [];
     docRef.current = base;
@@ -782,7 +786,7 @@ export function TripEditor({ tripId, initialTrip, publishedDocument, backHref }:
         onSave={(mobilePosition) => mutate((current) => ({ ...current, trip: { ...current.trip, heroImage: { ...current.trip.heroImage, mobilePosition } } }))}
       />
       <PrePublishChecklist open={checklistOpen} onOpenChange={setChecklistOpen} trip={document.trip} ctaIssues={ctaWarnings(document, liveSlug).map((item) => `${item.label}: ${item.message}`)} onOpenMobile={() => { setDevice("mobile"); setChecklistOpen(false); }} onContinue={() => { setChecklistOpen(false); setPublishOpen(true); }} />
-      <PublishDialog open={publishOpen} onOpenChange={setPublishOpen} document={document} tripId={tripId} onPublished={(slug) => { window.localStorage.removeItem(STORAGE_KEY); setSaveState("saved"); setLiveSlug(slug); }} />
+      <PublishDialog open={publishOpen} onOpenChange={setPublishOpen} document={document} tripId={tripId} onPublished={(slug, published) => { publishedRef.current = published; window.localStorage.removeItem(STORAGE_KEY); setSaveState("saved"); setLiveSlug(slug); }} />
       <Dialog open={historyOpen} onOpenChange={setHistoryOpen}>
         <DialogContent className="max-h-[80vh] max-w-lg overflow-y-auto">
           <DialogHeader>

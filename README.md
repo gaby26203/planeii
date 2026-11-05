@@ -18,6 +18,7 @@ con Supabase como base de datos, autenticación y archivos.
 | [docs/arquitectura.md](docs/arquitectura.md) | Grafos de arquitectura, capas, modelo de datos y permisos |
 | [docs/flujos.md](docs/flujos.md) | Diagramas de los flujos implementados |
 | [docs/migracion.md](docs/migracion.md) | Qué se cambió respecto a Lovable y cómo terminar la puesta en marcha |
+| [docs/demo.md](docs/demo.md) | Datos de ejemplo y guion de la demo guiada |
 | [AGENTS.md](AGENTS.md) | Reglas de arquitectura del editor de páginas de venta |
 | [docs/historial-lovable/](docs/historial-lovable/) | Planes históricos del agente de Lovable |
 

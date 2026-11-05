@@ -5,6 +5,7 @@ import { useTripsStore } from "@/lib/trips-store";
 import { acceptMyPendingInvitations } from "@/lib/trip-invitations.functions";
 import { refreshAccess } from "@/lib/access";
 import { SaveErrorNotice } from "@/components/SaveErrorNotice";
+import { PresentationBanner, PresentationGuard } from "@/components/PresentationMode";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
@@ -21,7 +22,10 @@ function AuthenticatedLayout() {
     <>
       <TripsSyncer />
       <SaveErrorNotice />
-      <Outlet />
+      <PresentationBanner />
+      <PresentationGuard>
+        <Outlet />
+      </PresentationGuard>
     </>
   );
 }

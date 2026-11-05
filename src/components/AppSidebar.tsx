@@ -13,14 +13,16 @@ import {
   ShieldCheck,
   Settings,
   Trash2,
-
+  MonitorPlay,
 } from "lucide-react";
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { usePermissions, useAccess } from "@/lib/access";
+import { usePresentationMode } from "@/lib/presentation-mode";
 import {
   DropdownMenu,
+  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
@@ -72,6 +74,8 @@ export function AppSidebar() {
   const { isOwner } = useAccess();
   const [email, setEmail] = useState<string | null>(null);
   const [displayName, setDisplayName] = useState<string | null>(null);
+  const presenting = usePresentationMode((s) => s.enabled);
+  const setPresenting = usePresentationMode((s) => s.setEnabled);
 
   const visibleMain = mainNav.filter((item) => {
     if (item.url === "/") return true;
@@ -254,6 +258,14 @@ export function AppSidebar() {
                 Papelera
               </Link>
             </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuCheckboxItem
+              checked={presenting}
+              onCheckedChange={(on) => setPresenting(on === true)}
+            >
+              <MonitorPlay className="h-4 w-4 mr-2" />
+              Modo presentación
+            </DropdownMenuCheckboxItem>
             <DropdownMenuSeparator />
 
 

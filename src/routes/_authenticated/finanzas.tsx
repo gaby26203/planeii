@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { AccessGate } from "@/components/AccessGate";
+import { useVisibleTrips } from "@/lib/presentation-mode";
 import { useState, useMemo } from "react";
 import {
   DollarSign,
@@ -82,7 +83,7 @@ function formatAmount(amount: number): string {
 }
 
 function FinanzasPage() {
-  const tripsRecord = useTripsRecord();
+  const tripsRecord = useVisibleTrips(useTripsRecord());
   // Derivamos la lista para el selector con useMemo: estable mientras
   // tripsRecord no cambie de referencia (Zustand garantiza referencia estable).
   // Solo viajes con "Ver finanzas": en los demás el servidor no manda los montos de costos.

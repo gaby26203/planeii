@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useTripsStore } from "@/lib/trips-store";
 import { usePermissions } from "@/lib/access";
+import { useVisibleTrips } from "@/lib/presentation-mode";
 
 export const Route = createFileRoute("/_authenticated/papelera")({
   component: TrashPage,
@@ -128,7 +129,7 @@ function TrashedTripRow({ trip, canManage }: { trip: Row; canManage: boolean }) 
 }
 
 function TrashPage() {
-  const trips = useTripsStore((s) => s.trips);
+  const trips = useVisibleTrips(useTripsStore((s) => s.trips));
   const hydrated = useTripsStore((s) => s.hydrated);
   const hydrating = useTripsStore((s) => s.hydrating);
   const { canCreateTrip } = usePermissions();

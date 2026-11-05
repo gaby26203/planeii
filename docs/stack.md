@@ -60,9 +60,12 @@ Versiones instaladas según `bun.lock` a octubre de 2026.
 | `bun run test` | Tests unitarios de `e2e/*.test.ts` con Bun |
 | `bun run test:e2e` | Playwright sobre `e2e/*.spec.ts`; necesita servidor y sesión |
 | `bun run smoke` | Lista de comprobación de un despliegue (`e2e/smoke/`), ver migracion.md |
+| `bun run demo:sql` | SQL de los viajes vitrina de la demo guiada (`--remove` para borrarlos), ver demo.md |
 | `bun run assets:download` | Descarga las fotos de la plantilla de Oaxaca desde la app de Lovable |
 | `bun run db:push` | Aplica `supabase/migrations` al proyecto vinculado |
 | `bun run db:types` | Regenera `src/integrations/supabase/types.ts` |
+| `bun run migrate:storage` | Copia los tres buckets de un proyecto Supabase a otro; `--dry-run` solo lista. Ver migracion.md |
+| `bun run migrate:verify` | Compara filas por tabla y objetos por bucket entre los dos proyectos |
 
 Si tu máquina no tiene IPv6, el servidor de desarrollo falla al escuchar en `::`. En ese caso
 usa `bun run dev -- --host 127.0.0.1`.
@@ -81,3 +84,4 @@ Plantilla completa en [`.env.example`](../.env.example).
 | `AI_API_KEY`, `AI_BASE_URL`, `AI_MODEL` | `src/lib/ai-gateway.server.ts` | Secreta / configuración |
 | `PLAYWRIGHT_BASE_URL`, `E2E_*` | Tests e2e | Solo tests |
 | `SMOKE_BASE_URL`, `SMOKE_EMAIL`, `SMOKE_PASSWORD`, `SMOKE_SLUG`, `SMOKE_WRITE` | `bun run smoke` | Solo tests; la contraseña es secreta |
+| `SOURCE_SUPABASE_URL`, `SOURCE_SERVICE_ROLE_KEY`, `TARGET_SUPABASE_URL`, `TARGET_SERVICE_ROLE_KEY` | `bun run migrate:storage` y `bun run migrate:verify` | Solo el día del corte; las claves son secretas |

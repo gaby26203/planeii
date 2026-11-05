@@ -375,7 +375,7 @@ sequenceDiagram
     E->>LS: tras 1500 ms
     E->>DB: upsert trip_page_drafts (onConflict trip_id)
   end
-  E->>E: Descartar → vuelve al publicado y borra el borrador
+  E->>E: Descartar → vuelve al último publicado (también si se publicó<br/>en la misma sesión) y borra el borrador
 ```
 
 ### 15. Editor ↔ iframe por postMessage
@@ -517,7 +517,8 @@ sequenceDiagram
   participant T as /api/public/track
   participant DB
   participant M as /viajes/$id/metricas
-  P->>T: view al montar, click en CTAs, form_start, form_submit
+  P->>P: con la visita resuelve la sesión una vez,<br/>así los clics salen antes de navegar
+  P->>T: view al montar, click (announcement | booking | section),<br/>form_start, form_submit
   opt hay sesión
     T->>DB: ¿dueña u organizadora del viaje?
     T-->>P: 202 y descarta
@@ -527,6 +528,11 @@ sequenceDiagram
   T->>DB: INSERT trip_page_events con service role (+ país de cf-ipcountry)
   M->>DB: getTripPageMetrics: últimos 30 días (máx. 5000)<br/>+ conteo de trip_applications
 ```
+
+El `target` de cada clic sale de `classifyLandingClick` (`src/lib/trip-analytics.ts`): los botones
+de la barra de anuncio son `announcement`; los que llevan al formulario o a un enlace, `booking`; los
+que bajan a una sección, como "Ver itinerario", `section`. "Clics en reserva" no cuenta `section`.
+Los clics registrados antes de esta distinción quedaron todos como `booking`.
 
 ### 23. Panel de solicitudes
 

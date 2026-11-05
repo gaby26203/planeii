@@ -203,6 +203,7 @@ interface TripsState {
         | "exchangeRate"
         | "exchangeRateUpdatedAt"
         | "coverImage"
+        | "showcase"
       >
     >,
   ) => void;

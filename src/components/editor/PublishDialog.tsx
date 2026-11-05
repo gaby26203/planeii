@@ -18,7 +18,7 @@ export function toSlug(value: string) {
 
 type Availability = "idle" | "checking" | "available" | "taken" | "short";
 
-export function PublishDialog({ open, onOpenChange, document, tripId, onPublished }: { open: boolean; onOpenChange: (open: boolean) => void; document: EditorDocument; tripId: string; onPublished?: (slug: string) => void }) {
+export function PublishDialog({ open, onOpenChange, document, tripId, onPublished }: { open: boolean; onOpenChange: (open: boolean) => void; document: EditorDocument; tripId: string; onPublished?: (slug: string, published: EditorDocument) => void }) {
   const [user, setUser] = useState<User | null>(null);
   const [authState, setAuthState] = useState<"loading" | "ok" | "missing">("loading");
   const [slug, setSlug] = useState("");
@@ -89,7 +89,7 @@ export function PublishDialog({ open, onOpenChange, document, tripId, onPublishe
       setSlug(clean);
       setExistingSlug(clean);
       setPublishedUrl(`${window.location.origin}/v/${clean}`);
-      onPublished?.(clean);
+      onPublished?.(clean, doc);
       toast.success(existingSlug ? "Página actualizada" : "Página publicada", { description: `${window.location.origin}/v/${clean}` });
     } catch (error) {
       const text = error instanceof Error ? error.message : String((error as { message?: string })?.message ?? error);
