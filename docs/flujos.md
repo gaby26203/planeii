@@ -147,10 +147,11 @@ sequenceDiagram
   L->>SF: acceptMyPendingInvitations()
   L->>S: hydrateFromSupabase()
   S->>SF: listMyTrips()
-  SF->>DB: select trips (filtrado por RLS)
-  SF-->>S: filas con data completo
+  SF->>DB: select id, owner_id de trips (RLS) + membresías
+  SF->>DB: data de esos viajes (service role)
+  SF-->>S: data completo, o sin montos de costos<br/>si no tiene "Ver finanzas" en ese viaje
   S->>S: backfill de moneda, purga de viajes vencidos en papelera
-  L->>RT: canal trips-live-sync (trips, trip_members, trip_notes,<br/>trip_todos, trip_documents, trip_invitations, user_roles)
+  L->>RT: canal trips-live-sync (trip_change_signals, trip_members, trip_notes,<br/>trip_todos, trip_documents, trip_invitations, user_roles)
   RT-->>L: cualquier cambio
   L->>S: re-hidratación completa (debounce 300 ms)
 ```
@@ -159,6 +160,11 @@ sequenceDiagram
 
 Todo cambio de `trips.data` pasa por aquí (`trips-store.ts`, `trips.functions.ts`). La base no
 acepta UPDATE de `trips` con la sesión de la usuaria: solo escribe el servidor, después de validar.
+Tampoco deja leer la columna `data` con la sesión: el servidor la trae con service role y, a quien
+no tiene "Ver finanzas", se la manda sin montos de costos ni costo de extras
+(`src/lib/trip-finance-visibility.ts`). Al guardar, esos campos se reponen del viaje guardado
+antes de comparar permisos. `trips` no está en la publicación de Realtime: un trigger marca en
+`trip_change_signals` qué viaje cambió, sin contenido, y eso dispara la recarga.
 
 ```mermaid
 sequenceDiagram
@@ -172,7 +178,9 @@ sequenceDiagram
   S->>S: set() + auditLog dentro del JSON
   S->>Q: suscriptor detecta cambio → espera 800 ms<br/>(saveTripNow la salta)
   Q->>SF: persistTrip(trip) serializado por viaje
-  SF->>DB: lee trips.data actual (sesión de la usuaria, RLS)
+  SF->>DB: ¿ve el viaje? (sesión de la usuaria, RLS)
+  SF->>DB: lee trips.data actual (service role)
+  SF->>SF: sin "Ver finanzas": restoreHiddenFinance(viejo, nuevo)
   SF->>SF: loadEffectivePerms + requiredWriteScopes(viejo, nuevo)<br/>campo sin regla o papelera → solo owner
   alt faltan permisos o falla la red
     SF-->>S: error → saveError {tripId, mensaje}

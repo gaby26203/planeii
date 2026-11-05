@@ -69,8 +69,10 @@ function TripsSyncer() {
       }, 300);
     };
 
+    // `trips` no se publica: su JSON lleva finanzas. Un trigger marca en
+    // `trip_change_signals` qué viaje cambió, sin contenido.
     const TABLES = [
-      "trips",
+      "trip_change_signals",
       "trip_members",
       "trip_notes",
       "trip_todos",

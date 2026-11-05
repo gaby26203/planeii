@@ -7,6 +7,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 import { normalize } from "@/lib/trip-permissions";
+import { redactFinance } from "@/lib/trip-finance-visibility";
 
 const inputSchema = z.object({
   tripId: z.string().min(1),
@@ -41,19 +42,28 @@ export const generateTripExport = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) => inputSchema.parse(input))
   .handler(async ({ data, context }) => {
-    // RLS filtra: solo miembros del viaje ven la fila.
-    const { data: row, error } = await context.supabase
+    // RLS filtra: solo miembros del viaje ven la fila. `data` se lee con service role.
+    const { data: visible, error: visErr } = await context.supabase
+      .from("trips")
+      .select("id")
+      .eq("id", data.tripId)
+      .maybeSingle();
+    if (visErr) throw new Error(visErr.message);
+    if (!visible) throw new Error("Viaje no encontrado o sin acceso.");
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: stored, error } = await supabaseAdmin
       .from("trips")
       .select("id, name, data")
       .eq("id", data.tripId)
       .maybeSingle();
     if (error) throw new Error(error.message);
-    if (!row) throw new Error("Viaje no encontrado o sin acceso.");
+    if (!stored) throw new Error("Viaje no encontrado o sin acceso.");
 
+    const seesFinance = await canSeeFinance(context.supabase, context.userId, data.tripId);
     const requested = data.includeFinance !== false;
-    const allowedFinance = requested
-      ? await canSeeFinance(context.supabase, context.userId, data.tripId)
-      : false;
+    const allowedFinance = requested && seesFinance;
+    // Sin "Ver finanzas" el export tampoco lleva montos de costos en el itinerario.
+    const row = seesFinance ? stored : { ...stored, data: redactFinance(stored.data) };
 
     const { buildTripPDF, buildTripXLSX } = await import("./trip-exports.server");
     // La columna `name` es la fuente de verdad del nombre (se actualiza junto
@@ -66,9 +76,10 @@ export const generateTripExport = createServerFn({ method: "POST" })
 
     return {
       filename: built.filename,
-      mime: data.format === "pdf"
-        ? "application/pdf"
-        : "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      mime:
+        data.format === "pdf"
+          ? "application/pdf"
+          : "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       base64: toBase64(built.bytes),
       financeIncluded: allowedFinance,
       financeRequested: requested,

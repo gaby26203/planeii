@@ -84,6 +84,15 @@ export function AccessProvider({ children }: { children: ReactNode }) {
   return <AccessContext.Provider value={value}>{children}</AccessContext.Provider>;
 }
 
+/** Si la usuaria puede ver las finanzas de un viaje (owner global o permiso "Ver finanzas"). */
+export function useCanSeeTripFinance(): (tripId: string) => boolean {
+  const { isOwner, memberships } = useAccess();
+  return useMemo(
+    () => (tripId: string) => isOwner || Boolean(memberships[tripId]?.perms.ver_finanzas),
+    [isOwner, memberships],
+  );
+}
+
 export function useAccess(): AccessState {
   const ctx = useContext(AccessContext);
   if (!ctx) {

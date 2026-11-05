@@ -156,3 +156,9 @@ describe("requiredWriteScopes", () => {
     expect(r.ownerOnly).toEqual(['el campo "constructor"', 'el campo "toString"']);
   });
 });
+
+test("el mismo objeto con las claves en otro orden no es un cambio", () => {
+  const a = { id: "t1", costs: [{ id: "c1", amount: 10, notes: "" }], status: "planificando" };
+  const b = { status: "planificando", costs: [{ notes: "", amount: 10, id: "c1" }], id: "t1" };
+  expect(requiredWriteScopes(a, b)).toEqual({ scopes: [], ownerOnly: [] });
+});

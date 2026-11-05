@@ -61,8 +61,18 @@ export interface WriteScopes {
   ownerOnly: string[];
 }
 
+/** JSON con las claves ordenadas: el mismo objeto con otro orden de claves no es un cambio. */
+function stableJson(value: unknown): string {
+  return JSON.stringify(value ?? null, (_key, v: unknown) => {
+    if (!v || typeof v !== "object" || Array.isArray(v)) return v;
+    const sorted: Record<string, unknown> = {};
+    for (const k of Object.keys(v).sort()) sorted[k] = (v as Record<string, unknown>)[k];
+    return sorted;
+  });
+}
+
 function same(a: unknown, b: unknown): boolean {
-  return JSON.stringify(a ?? null) === JSON.stringify(b ?? null);
+  return stableJson(a) === stableJson(b);
 }
 
 function asBlob(value: unknown): Blob {
