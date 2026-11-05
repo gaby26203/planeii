@@ -60,6 +60,7 @@ Versiones instaladas según `bun.lock` a octubre de 2026.
 | `bun run test` | Tests unitarios de `e2e/*.test.ts` con Bun |
 | `bun run test:e2e` | Playwright sobre `e2e/*.spec.ts`; necesita servidor y sesión |
 | `bun run smoke` | Lista de comprobación de un despliegue (`e2e/smoke/`), ver migracion.md |
+| `bun run demo:sql` | SQL de los viajes vitrina de la demo guiada (`--remove` para borrarlos), ver demo.md |
 | `bun run assets:download` | Descarga las fotos de la plantilla de Oaxaca desde la app de Lovable |
 | `bun run db:push` | Aplica `supabase/migrations` al proyecto vinculado |
 | `bun run db:types` | Regenera `src/integrations/supabase/types.ts` |
