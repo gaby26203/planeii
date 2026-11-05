@@ -518,11 +518,11 @@ sequenceDiagram
   participant DB
   participant M as /viajes/$id/metricas
   P->>T: view al montar, click en CTAs, form_start, form_submit
-  T->>T: límite por IP y viaje (40 cada 5 min) → 429
   opt hay sesión
     T->>DB: ¿dueña u organizadora del viaje?
     T-->>P: 202 y descarta
   end
+  Note over T: antes de todo, límite por IP y viaje<br/>(40 cada 5 min) → 429
   T->>DB: ¿el viaje tiene página publicada? si no, 404
   T->>DB: INSERT trip_page_events con service role (+ país de cf-ipcountry)
   M->>DB: getTripPageMetrics: últimos 30 días (máx. 5000)<br/>+ conteo de trip_applications
