@@ -89,14 +89,19 @@ sequenceDiagram
   INV->>SF: lookupTripInvitation(token)
   SF->>DB: trip_invitations, trips (service role)
   INV->>SF: acceptTripInvitation(token)
-  SF->>SF: email del JWT = email invitado
+  SF->>SA: auth.admin.getUserById → email confirmado
+  alt email sin confirmar
+    SF-->>INV: pide confirmar el correo y volver
+  end
+  SF->>SF: email confirmado = email invitado
   SF->>DB: upsert profiles, upsert trip_members, invitación → accepted
   SF->>DB: access_audit_log (2 filas)
   INV->>P: navega a /viajes/$tripId
 ```
 
 Respaldo: cada vez que se monta el layout autenticado, `acceptMyPendingInvitations` acepta
-todas las invitaciones pendientes del email de la sesión. Las invitaciones no se envían por
+todas las invitaciones pendientes del email de la cuenta, solo si Auth lo tiene confirmado. El
+email del JWT no basta: alguien podría registrarse con el email invitado de otra persona. Las invitaciones no se envían por
 correo: la owner copia el enlace.
 
 Reset de contraseña: `resetPasswordForEmail` con `redirectTo=/reset-password`, que espera el
@@ -162,7 +167,7 @@ sequenceDiagram
   participant Q as Cola por viaje
   participant SF as updateTripData
   participant DB
-  participant RT as Broadcast trip-activity
+  participant RT as Broadcast privado trip-activity
   UI->>S: acción (updateCost, addInstallmentPayment…)
   S->>S: set() + auditLog dentro del JSON
   S->>Q: suscriptor detecta cambio → espera 800 ms<br/>(saveTripNow la salta)
@@ -327,6 +332,11 @@ stateDiagram-v2
 Tras cada guardado, `notifyTripActivity` envía un broadcast al canal `trip-activity:<tripId>`.
 `useTripActivity` lo muestra a las demás personas que tienen el viaje abierto, junto con la
 sección en la que está cada una. No se guarda nada en la base.
+
+El canal es privado (`private: true`): Realtime solo deja escuchar o enviar a quien pase las
+políticas de `realtime.messages`, es decir, miembros del viaje, la dueña o un owner
+(`private.can_use_trip_activity_topic`). El canal `trips-live-sync` sigue siendo público porque
+solo trae cambios de tablas, y esos ya los filtra la RLS de cada tabla.
 
 ---
 

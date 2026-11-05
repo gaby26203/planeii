@@ -8,10 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { AuthShell } from "@/components/AuthShell";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import {
-  lookupTripInvitation,
-  acceptTripInvitation,
-} from "@/lib/trip-invitations.functions";
+import { lookupTripInvitation, acceptTripInvitation } from "@/lib/trip-invitations.functions";
 
 export const Route = createFileRoute("/invitacion/$token")({
   ssr: false,
@@ -30,6 +27,8 @@ type LookupResult =
       status: "pending" | "accepted" | "revoked";
       expired: boolean;
       matchesEmail: boolean;
+      /** La sesión es del email invitado, pero ese email todavía no está confirmado. */
+      needsEmailConfirmation?: boolean;
       currentEmail: string | null;
       isMember: boolean;
     };
@@ -143,12 +142,10 @@ function InvitationPage() {
             <div className="space-y-4">
               <div className="text-center">
                 <Mail className="h-8 w-8 mx-auto text-primary" />
-                <h1 className="font-display text-xl font-semibold mt-3">
-                  Invitación a un viaje
-                </h1>
+                <h1 className="font-display text-xl font-semibold mt-3">Invitación a un viaje</h1>
                 <p className="text-xs text-muted-foreground mt-1">
-                  Crea tu cuenta o inicia sesión con el correo al que te enviaron la
-                  invitación. En cuanto entres, el acceso al viaje se activa solo.
+                  Crea tu cuenta o inicia sesión con el correo al que te enviaron la invitación. En
+                  cuanto entres, el acceso al viaje se activa solo.
                 </p>
               </div>
               <Button className="w-full" onClick={() => goToAuth()}>
@@ -174,10 +171,9 @@ function InvitationPage() {
             <InvitationDetails
               data={state.data}
               onAccept={handleAccept}
-              onSwitch={() =>
-                switchAccount(state.data.found ? state.data.email : undefined)
-              }
+              onSwitch={() => switchAccount(state.data.found ? state.data.email : undefined)}
               onOpenTrip={(tripId) => navigate({ to: "/viajes/$tripId", params: { tripId } })}
+              onRetry={() => void bootstrap()}
               onCancel={() => navigate({ to: "/" })}
             />
           )}
@@ -225,12 +221,14 @@ function InvitationDetails({
   onAccept,
   onSwitch,
   onOpenTrip,
+  onRetry,
   onCancel,
 }: {
   data: Extract<LookupResult, { found: true }>;
   onAccept: () => void;
   onSwitch: () => void;
   onOpenTrip: (tripId: string) => void;
+  onRetry: () => void;
   onCancel: () => void;
 }) {
   if (data.status === "accepted") {
@@ -245,7 +243,9 @@ function InvitationDetails({
         {data.isMember ? (
           <Button onClick={() => onOpenTrip(data.tripId)}>Abrir viaje</Button>
         ) : (
-          <Button variant="outline" onClick={onCancel}>Ir al inicio</Button>
+          <Button variant="outline" onClick={onCancel}>
+            Ir al inicio
+          </Button>
         )}
       </div>
     );
@@ -258,7 +258,9 @@ function InvitationDetails({
         <p className="text-xs text-muted-foreground">
           Pídele a la administradora que te envíe un enlace nuevo.
         </p>
-        <Button variant="outline" onClick={onCancel}>Ir al inicio</Button>
+        <Button variant="outline" onClick={onCancel}>
+          Ir al inicio
+        </Button>
       </div>
     );
   }
@@ -270,7 +272,9 @@ function InvitationDetails({
         <p className="text-xs text-muted-foreground">
           Pídele a la administradora que te envíe un enlace nuevo.
         </p>
-        <Button variant="outline" onClick={onCancel}>Ir al inicio</Button>
+        <Button variant="outline" onClick={onCancel}>
+          Ir al inicio
+        </Button>
       </div>
     );
   }
@@ -303,7 +307,20 @@ function InvitationDetails({
         )}
       </div>
 
-      {data.matchesEmail ? (
+      {data.needsEmailConfirmation ? (
+        <div className="space-y-2">
+          <p className="text-xs text-center">
+            Confirma tu correo <b>{data.email}</b> para activar tu acceso: abre el enlace que te
+            enviamos al registrarte y vuelve a esta página.
+          </p>
+          <Button className="w-full" onClick={onRetry}>
+            Ya lo confirmé
+          </Button>
+          <Button variant="ghost" className="w-full" onClick={onCancel}>
+            Ahora no
+          </Button>
+        </div>
+      ) : data.matchesEmail ? (
         <div className="space-y-2">
           <Button className="w-full" onClick={onAccept}>
             Aceptar invitación
@@ -316,8 +333,8 @@ function InvitationDetails({
         <div className="space-y-2">
           <p className="text-xs text-destructive text-center">
             Esta invitación es para <b>{data.email}</b> y estás usando{" "}
-            <b>{data.currentEmail ?? "otra cuenta"}</b>. Entra con{" "}
-            <b>{data.email}</b> para activar tu acceso.
+            <b>{data.currentEmail ?? "otra cuenta"}</b>. Entra con <b>{data.email}</b> para activar
+            tu acceso.
           </p>
           <Button variant="outline" className="w-full" onClick={onSwitch}>
             Cerrar sesión y entrar con {data.email}

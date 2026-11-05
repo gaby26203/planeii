@@ -14,8 +14,8 @@ venta con su formulario público. Cinco de las once secciones del menú están v
 
 Los problemas más serios no son de build sino de **seguridad en la base de datos**. Los viajes,
 sus miembros y la analítica ya solo se escriben a través del servidor, y las landings ya no se
-pueden listar, pero quedan puntos abiertos: el más importante es que las finanzas viajan completas
-a todos los miembros.
+pueden listar. El punto abierto más importante es que las finanzas viajan completas a todos los
+miembros.
 
 | Comprobación | Exportación de Lovable | Versión migrada |
 |---|---|---|
@@ -57,13 +57,7 @@ Ordenado por gravedad.
 
 1. **El permiso de finanzas solo oculta la interfaz.** Leído: `listMyTrips` devuelve el JSON
    completo, con finanzas y datos personales de viajeras, a cualquier miembro.
-2. **Canal de actividad público.** Leído: `trip-activity:<tripId>` es un canal broadcast sin
-   autorización; quien conozca un id puede escuchar o enviar avisos falsos.
-3. **Aceptar invitaciones depende de que Supabase confirme el email.** Leído: se compara
-   `claims.email` sin mirar `email_verified`. En el proyecto Supabase nuevo hay que dejar activa
-   la confirmación de email; si no, alguien podría registrarse con el email invitado de otra
-   persona.
-4. **Otros menores.** Leído: cada usuaria puede editar su `profiles.email` (que se usa para los
+2. **Otros menores.** Leído: cada usuaria puede editar su `profiles.email` (que se usa para los
    avisos de solicitudes); `generateSalesCopy` solo exige sesión y el registro está abierto;
    `/api/public/page-image/*` sirve cualquier ruta válida del bucket aunque la página no esté
    publicada; `has_role` permite averiguar quién es owner.
@@ -91,6 +85,14 @@ También corregido (`20261105140000_public_pages_and_analytics_via_server.sql`):
 - **Landings.** Antes se podían listar todas, con `owner_id` y `trip_id`. Ahora el público pide una
   sola por su slug exacto (`get_published_page`) y la tabla solo la leen el equipo del viaje y los
   owners.
+
+También corregido:
+
+- **Canal de actividad.** `trip-activity:<tripId>` era público: quien conociera el id podía
+  escuchar o mandar avisos falsos. Ahora es privado, con políticas sobre `realtime.messages`
+  (`20261105150000_private_trip_activity_channel.sql`).
+- **Invitaciones.** Se aceptaban comparando el email del JWT, sin mirar si estaba confirmado. Ahora
+  el servidor pide el email confirmado a Auth; una cuenta sin confirmar ve un aviso para hacerlo.
 
 Las notas de costo, que antes se mostraban sin sanear, pasan por `sanitizeNoteHtml`
 (`src/lib/sanitize-note-html.ts`): solo quedan etiquetas de formato y enlaces http, https o mailto.
@@ -152,5 +154,5 @@ Las notas de costo, que antes se mostraban sin sanear, pasan por `sanitizeNoteHt
 ## Próximos pasos recomendados
 
 1. Completar la puesta en marcha de [migracion.md](migracion.md).
-2. Filtrar las finanzas en `listMyTrips` y cerrar el canal de actividad.
+2. Filtrar las finanzas en `listMyTrips`.
 3. Formatear todo el repo en un commit aparte y partir `viajes.$tripId.tsx`.
