@@ -12,9 +12,10 @@ La app compila, pasa el typecheck y sus tests unitarios. Funcionalmente está ma
 el espacio de trabajo de cada viaje (costos, viajeras, pagos, notas) y el editor de páginas de
 venta con su formulario público. Cinco de las once secciones del menú están vacías.
 
-Los problemas más serios no son de build sino de **seguridad en la base de datos**. Los viajes ya
-solo se guardan a través del servidor, que valida los permisos finos de cada miembro, pero otras
-tablas, como `trip_members`, todavía aceptan escrituras directas que el servidor no permitiría.
+Los problemas más serios no son de build sino de **seguridad en la base de datos**. Los viajes y
+sus miembros ya solo se escriben a través del servidor, que valida los permisos, pero quedan
+puntos abiertos: las finanzas viajan completas a todos los miembros y la analítica se puede
+falsificar desde afuera.
 
 | Comprobación | Exportación de Lovable | Versión migrada |
 |---|---|---|
@@ -54,23 +55,20 @@ El formato se arregla con `bun run format`, conviene hacerlo en un commit aparte
 
 Ordenado por gravedad.
 
-1. **Las organizadoras pueden gestionar miembros desde la base.** Leído: las server functions
-   exigen owner global, pero la RLS de `trip_members` permite a organizadoras insertar, editar
-   permisos y borrar miembros. Esos cambios no quedan en `access_audit_log`.
-2. **El permiso de finanzas solo oculta la interfaz.** Leído: `listMyTrips` devuelve el JSON
+1. **El permiso de finanzas solo oculta la interfaz.** Leído: `listMyTrips` devuelve el JSON
    completo, con finanzas y datos personales de viajeras, a cualquier miembro.
-3. **Analítica falsificable.** Leído: `anon` puede insertar en `trip_page_events` con cualquier
+2. **Analítica falsificable.** Leído: `anon` puede insertar en `trip_page_events` con cualquier
    `trip_id` directamente por PostgREST, sin límite de frecuencia y saltando el filtro del
    equipo de `/api/public/track`.
-4. **Landings listables.** Leído: `trip_pages` tiene SELECT abierto a `anon`, así que se pueden
+3. **Landings listables.** Leído: `trip_pages` tiene SELECT abierto a `anon`, así que se pueden
    listar todas las páginas con su `owner_id` y `trip_id`.
-5. **Canal de actividad público.** Leído: `trip-activity:<tripId>` es un canal broadcast sin
+4. **Canal de actividad público.** Leído: `trip-activity:<tripId>` es un canal broadcast sin
    autorización; quien conozca un id puede escuchar o enviar avisos falsos.
-6. **Aceptar invitaciones depende de que Supabase confirme el email.** Leído: se compara
+5. **Aceptar invitaciones depende de que Supabase confirme el email.** Leído: se compara
    `claims.email` sin mirar `email_verified`. En el proyecto Supabase nuevo hay que dejar activa
    la confirmación de email; si no, alguien podría registrarse con el email invitado de otra
    persona.
-7. **Otros menores.** Leído: cada usuaria puede editar su `profiles.email` (que se usa para los
+6. **Otros menores.** Leído: cada usuaria puede editar su `profiles.email` (que se usa para los
    avisos de solicitudes); `generateSalesCopy` solo exige sesión y el registro está abierto;
    `/api/public/page-image/*` sirve cualquier ruta válida del bucket aunque la página no esté
    publicada; `has_role` permite averiguar quién es owner.
@@ -81,6 +79,12 @@ miembro podía cambiar la fila completa con su sesión, incluso ponerse como `ow
 viaje; se comprobó con PostgREST sobre las migraciones anteriores. La regla de permisos
 (`src/lib/trip-write-scopes.ts`) ahora cubre todos los campos: la papelera y cualquier campo sin
 regla declarada son solo del owner.
+
+También corregido: los miembros solo se agregan, editan o quitan desde el servidor
+(`20261105130000_trip_members_write_via_server.sql`). Antes, una organizadora podía ascender a una
+tour leader o sumar a otra persona con su sesión, y nada quedaba en `access_audit_log`. Ahora todo
+cambio pasa por funciones que exigen owner global y registran la bitácora, incluida la membresía
+de quien crea un viaje.
 
 Las notas de costo, que antes se mostraban sin sanear, pasan por `sanitizeNoteHtml`
 (`src/lib/sanitize-note-html.ts`): solo quedan etiquetas de formato y enlaces http, https o mailto.
@@ -142,5 +146,5 @@ Las notas de costo, que antes se mostraban sin sanear, pasan por `sanitizeNoteHt
 ## Próximos pasos recomendados
 
 1. Completar la puesta en marcha de [migracion.md](migracion.md).
-2. Endurecer la RLS de `trip_members` y mover la escritura de analítica solo al servidor.
+2. Mover la escritura de analítica solo al servidor y filtrar las finanzas en `listMyTrips`.
 3. Formatear todo el repo en un commit aparte y partir `viajes.$tripId.tsx`.

@@ -217,7 +217,7 @@ flowchart LR
   ORGA & TL --> CHK["Dónde se comprueba"]
   CHK --> C1["Cliente: AccessGate, usePermissions<br/>(solo oculta UI)"]
   CHK --> C2["Servidor: updateTripData compara<br/>JSON viejo vs nuevo (requiredWriteScopes)<br/>y escribe con service role"]
-  CHK --> C3["RLS: lectura por miembro / dueña / owner;<br/>sin UPDATE directo de trips"]
+  CHK --> C3["RLS: lectura por miembro / dueña / owner;<br/>sin escritura directa de trips ni trip_members"]
 ```
 
 Los 8 permisos finos están en `src/lib/trip-permissions.ts`. La base de datos no los conoce: los

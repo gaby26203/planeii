@@ -107,7 +107,9 @@ con el mismo `resetPasswordForEmail`.
 ### 3. Gestión de accesos (owner)
 
 `/accesos` y `src/lib/admin-access.functions.ts`. Cada acción llama a `assertOwner` y luego usa
-service role.
+service role. La base no acepta escrituras en `trip_members` con la sesión de la usuaria, así que
+todo cambio de membresía pasa por estas funciones (o por aceptar una invitación o crear un viaje)
+y queda en la bitácora.
 
 ```mermaid
 flowchart LR
@@ -204,7 +206,8 @@ sequenceDiagram
   end
   UI->>S: createTrip(data) optimista
   S->>SF: createTrip
-  SF->>DB: has_role(owner) → INSERT trips → INSERT trip_members (organizadora)
+  SF->>DB: has_role(owner) → INSERT trips (RLS)
+  SF->>DB: INSERT trip_members (organizadora, service role)<br/>+ access_audit_log member_added
   opt paso 2
     UI->>SF: createTripInvitation → enlace al portapapeles
   end

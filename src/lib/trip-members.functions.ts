@@ -1,6 +1,7 @@
 // Gestión de miembros de viaje + permisos granulares.
-// Solo el owner global puede listar/agregar/editar/quitar; RLS ya bloquea
-// escrituras a no-owners pero re-verificamos en el handler para dar mensajes claros.
+// Solo el owner global puede agregar/editar/quitar. La base no acepta escrituras en
+// `trip_members` con la sesión de la usuaria: se valida aquí, se escribe con service role
+// y cada cambio queda en `access_audit_log`.
 
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
@@ -10,6 +11,10 @@ async function assertOwner(supabase: any, userId: string) {
   const { data, error } = await supabase.rpc("has_role", { _user_id: userId, _role: "owner" });
   if (error) throw new Error(error.message);
   if (!data) throw new Error("Solo el owner puede gestionar miembros del viaje.");
+}
+
+async function admin() {
+  return (await import("@/integrations/supabase/client.server")).supabaseAdmin;
 }
 
 const roleSchema = z.enum(["organizadora", "tour_leader"]);
@@ -69,7 +74,8 @@ export const addTripMember = createServerFn({ method: "POST" })
       .maybeSingle();
     if (profErr) throw new Error(profErr.message);
     if (!prof) throw new Error("No hay una cuenta registrada con ese email.");
-    const { error } = await context.supabase.from("trip_members").insert({
+    const db = await admin();
+    const { error } = await db.from("trip_members").insert({
       trip_id: data.tripId,
       user_id: prof.id as string,
       role: data.role,
@@ -108,12 +114,14 @@ export const updateTripMember = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     await assertOwner(context.supabase, context.userId);
-    const { data: prev } = await context.supabase
+    const db = await admin();
+    const { data: prev } = await db
       .from("trip_members")
       .select("trip_id, user_id, role, permissions")
       .eq("id", data.id)
       .maybeSingle();
-    const { error } = await context.supabase
+    if (!prev) throw new Error("Ese miembro ya no está en el viaje.");
+    const { error } = await db
       .from("trip_members")
       .update({ role: data.role, permissions: data.permissions ?? null })
       .eq("id", data.id);
@@ -140,12 +148,13 @@ export const removeTripMember = createServerFn({ method: "POST" })
   .inputValidator((input) => z.object({ id: z.string().min(1) }).parse(input))
   .handler(async ({ data, context }) => {
     await assertOwner(context.supabase, context.userId);
-    const { data: prev } = await context.supabase
+    const db = await admin();
+    const { data: prev } = await db
       .from("trip_members")
       .select("trip_id, user_id, role, permissions")
       .eq("id", data.id)
       .maybeSingle();
-    const { error } = await context.supabase.from("trip_members").delete().eq("id", data.id);
+    const { error } = await db.from("trip_members").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
     if (prev) {
       const { logAccessAudit } = await import("@/lib/access-audit.server");
