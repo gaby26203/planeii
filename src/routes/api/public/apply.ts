@@ -28,13 +28,17 @@ export const Route = createFileRoute("/api/public/apply")({
   server: {
     handlers: {
       POST: async ({ request }) => {
+        const raw: unknown = await request.json().catch(() => null);
+        // Campo trampa anti-spam: si un bot lo llenó, fingimos éxito antes de validar el resto, así
+        // no aprende qué campo lo delató. Antes el esquema lo rechazaba con 400.
+        const honeypot = (raw as { website?: unknown } | null)?.website;
+        if (typeof honeypot === "string" && honeypot.trim()) return Response.json({ ok: true });
         let payload: z.infer<typeof payloadSchema>;
         try {
-          payload = payloadSchema.parse(await request.json());
+          payload = payloadSchema.parse(raw);
         } catch {
           return fail("Revisa los datos: nombre, WhatsApp con código de país y correo válido.");
         }
-        if (payload.website) return Response.json({ ok: true }); // bot: fingimos éxito
 
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
         const { data: page, error: pageError } = await supabaseAdmin

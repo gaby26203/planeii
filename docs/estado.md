@@ -90,16 +90,12 @@ Las notas de costo, que antes se mostraban sin sanear, pasan por `sanitizeNoteHt
 
 | Área | Problema | Cómo se sabe |
 |---|---|---|
-| Formulario público | El campo trampa anti-spam nunca finge éxito: el esquema lo rechaza antes con 400 | Verificado en `apply.ts` |
 | Guardado del viaje | Cada carga crea objetos nuevos y puede reprogramar el guardado de todos los viajes; con Realtime podría encadenar recargas | Leído, sin reproducir |
-| Nuevo viaje | El id pre-generado no se regenera al cerrar el diálogo; un segundo viaje sin recargar podría chocar | Leído |
-| Analítica | Los clics de la barra de anuncio nunca se cuentan y "Ver itinerario" cuenta como clic de reserva | Leído |
 | Analítica | "Visitas totales" son solo 30 días con tope de 5.000 filas | Leído |
 | Monedas | Dashboard, Finanzas y viajeras formatean en USD aunque la moneda base sea otra, y el dashboard suma monedas distintas | Leído |
 | Viajeras | Con crédito aplicado, las cuotas se crean por el precio completo | Leído |
 | Itinerario | Título, descripción y actividades del día no se pueden editar, pero las exportaciones los usan | Leído |
 | Correo | El correo a la viajera dice "CHAMA VIAJA" para todos los viajes | Leído |
-| Editor | "Descartar" puede volver a una versión vieja si se publicó en la misma sesión | Leído |
 | Base | Borrar solicitudes fallaba por falta de GRANT DELETE | Corregido en la migración nueva |
 | Base | La suscripción Realtime a `user_roles` nunca recibía eventos | Corregido en la migración nueva |
 

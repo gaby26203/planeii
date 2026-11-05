@@ -1,7 +1,7 @@
 import type { TripData } from "@/data/trip";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { useHeadingFit } from "./use-heading-fit";
-import { trackTripEvent } from "@/lib/trip-analytics";
+import { classifyLandingClick, trackTripEvent } from "@/lib/trip-analytics";
 import { Navbar } from "./Navbar";
 import { Hero, TripMeta } from "./Hero";
 import { StorySection, Highlights } from "./Story";
@@ -10,7 +10,7 @@ import { Included, Itinerary, Gallery, Accommodation } from "./Details";
 import { TravelerProfile, Testimonials, FAQ, BookingCTA, FinalCTA, Footer, StickyBar } from "./Closing";
 import { DEFAULT_SECTION_ORDER, type EditorDocument, type SectionKey, type SectionStyle } from "@/lib/trip-editor";
 import { CtaProvider, EditorPreviewProvider, sectionStyle, hasButtonStyle } from "./shared";
-import { resolveCtaLink, sectionAnchorId } from "@/lib/cta-links";
+import { effectiveCtaLink, resolveCtaLink, sectionAnchorId } from "@/lib/cta-links";
 
 const sections: Record<SectionKey, (trip: TripData) => React.ReactNode> = {
   story: (trip) => <StorySection trip={trip} />,
@@ -59,28 +59,37 @@ export function TripLanding({
     style: (ctaId: string) => ctaDocument.ctaLinks?.[ctaId]?.style,
   } : null;
   const landingRef = useRef<HTMLDivElement | null>(null);
+  const announcementRef = useRef<HTMLDivElement | null>(null);
   const [announcementHeight, setAnnouncementHeight] = useState(0);
   useHeadingFit(landingRef, textStyles);
+  const ctaDocumentRef = useRef(ctaDocument);
+  useEffect(() => {
+    ctaDocumentRef.current = ctaDocument;
+  }, [ctaDocument]);
 
   useEffect(() => {
     if (!trackingTripId || editorPreview) return;
     trackTripEvent(trackingTripId, "view");
-    const root = landingRef.current;
-    if (!root) return;
+    // La barra de anuncio vive fuera del contenedor de la landing (ver AGENTS.md): el listener va
+    // en el documento y se filtra por los dos contenedores.
     const onClick = (event: MouseEvent) => {
       const link = (event.target as HTMLElement | null)?.closest?.("a.btn-primary, a.btn-ghost");
       if (!link) return;
-      const section = link.closest("[data-editor-section]")?.getAttribute("data-editor-section");
-      trackTripEvent(trackingTripId, "click", section === "announcement" ? "announcement" : "booking");
+      const inAnnouncement = !!announcementRef.current?.contains(link);
+      if (!inAnnouncement && !landingRef.current?.contains(link)) return;
+      const ctaId = link.getAttribute("data-cta-id");
+      const doc = ctaDocumentRef.current;
+      const ctaTarget = ctaId && doc ? effectiveCtaLink(doc, ctaId).target : undefined;
+      trackTripEvent(trackingTripId, "click", classifyLandingClick({ inAnnouncement, ctaTarget }));
     };
-    root.addEventListener("click", onClick, true);
-    return () => root.removeEventListener("click", onClick, true);
+    document.addEventListener("click", onClick, true);
+    return () => document.removeEventListener("click", onClick, true);
   }, [trackingTripId, editorPreview]);
   return (
     <EditorPreviewProvider enabled={editorPreview} textStyles={textStyles}>
     <CtaProvider value={cta}>
     <>
-      <div data-editor-section="announcement" className={hasButtonStyle(sectionStyles.announcement) ? "section-buttons" : undefined} style={sectionStyle(sectionStyles.announcement)}>
+      <div ref={announcementRef} data-editor-section="announcement" className={hasButtonStyle(sectionStyles.announcement) ? "section-buttons" : undefined} style={sectionStyle(sectionStyles.announcement)}>
         <StickyBar announcement={announcement} editorPreview={editorPreview} onHeightChange={setAnnouncementHeight} />
       </div>
       <div ref={landingRef} className={editorPreview ? "editor-preview @container relative" : "@container"} style={{ "--announcement-height": `${announcementHeight}px` } as CSSProperties}>
