@@ -18,6 +18,7 @@
 - In editorPreview a capture listener intercepts CTA clicks and opens that section's Design controls; visitor pages navigate normally.
 - Announcement bar renders outside the container-query root; no ancestor may set container-type/transform/filter/contain. It measures its height to offset nav and dismisses per session.
 - Trip rows are written only by `updateTripData` with the service role after `requiredWriteScopes`; the database grants no UPDATE on `trips` to anon/authenticated. Every top-level TripData field needs an entry in `FIELD_SCOPES` (src/lib/trip-write-scopes.ts), otherwise only the owner can change it. Why: members cannot bypass per-field permissions with the public key, and a new field is never writable by default.
+- `trip_members` is written only by server functions with the service role (global owner checks, invitations, createTrip), and each change is logged in `access_audit_log`; anon/authenticated have no INSERT/UPDATE/DELETE. Why: membership changes cannot skip the owner check or the audit log.
 - Analytics: only /v/$slug tracks via POST /api/public/track (trip_page_events); editor/preview never track, and authenticated trip owners/organizadoras are discarded server-side. Metrics aggregate in src/lib/trip-metrics.functions.ts.
 - Pre-migration page backups go to `trip_page_backups` (read-only for the trip team).
 - Hero mobile framing is stored as optional image focus coordinates and applied only below the mobile breakpoint; desktop framing remains centered and old documents remain unchanged.

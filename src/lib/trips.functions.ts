@@ -117,13 +117,27 @@ export const createTrip = createServerFn({ method: "POST" })
       ...toRow(data),
     });
     if (insertErr) throw new Error(insertErr.message);
-    const { error: memberErr } = await context.supabase.from("trip_members").insert({
+    // `trip_members` solo se escribe desde el servidor; quien crea queda como organizadora.
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error: memberErr } = await supabaseAdmin.from("trip_members").insert({
       trip_id: data.id,
       user_id: context.userId,
       role: "organizadora",
+      invited_by: context.userId,
     });
     if (memberErr && !memberErr.message.toLowerCase().includes("duplicate")) {
       throw new Error(memberErr.message);
+    }
+    if (!memberErr) {
+      const { logAccessAudit } = await import("@/lib/access-audit.server");
+      await logAccessAudit({
+        action: "member_added",
+        actorId: context.userId,
+        actorEmail: (context.claims as { email?: string } | undefined)?.email ?? null,
+        tripId: data.id,
+        targetUserId: context.userId,
+        details: { role: "organizadora", permissions: null, via: "trip_created" },
+      });
     }
     return { ok: true as const };
   });
