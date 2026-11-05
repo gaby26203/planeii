@@ -43,6 +43,7 @@ import {
   type TripPermMap,
 } from "@/lib/trip-permissions";
 import { TripCoverPicker } from "@/components/TripCoverPicker";
+import { deleteTripCoverRef, isStoragePath } from "@/lib/trip-cover-storage";
 
 
 const GRADIENTS = [
@@ -82,7 +83,8 @@ export function NewTripDialog({ trigger }: Props) {
   const [pricePerPerson, setPricePerPerson] = useState<number>(0);
   const [coverImage, setCoverImage] = useState<string | null>(null);
   // ID pre-generado para que TripCoverPicker pueda subir al bucket antes de crear el viaje.
-  const [pendingTripId] = useState(() => generateId());
+  // Se renueva en cada reset: reusarlo para un segundo viaje sin recargar chocaba con el primero.
+  const [pendingTripId, setPendingTripId] = useState(() => generateId());
 
 
   const [createdTripId, setCreatedTripId] = useState<string | null>(null);
@@ -120,6 +122,7 @@ export function NewTripDialog({ trigger }: Props) {
     setCapacity(10);
     setPricePerPerson(0);
     setCoverImage(null);
+    setPendingTripId(generateId());
 
     setCreatedTripId(null);
     setEmail("");
@@ -132,7 +135,10 @@ export function NewTripDialog({ trigger }: Props) {
   function handleOpenChange(next: boolean) {
     if (saving) return;
     setOpen(next);
-    if (!next) setTimeout(reset, 200);
+    if (next) return;
+    // Una portada subida para un viaje que no se llegó a crear queda huérfana en el bucket.
+    if (!createdTripId && isStoragePath(coverImage)) void deleteTripCoverRef(coverImage);
+    setTimeout(reset, 200);
   }
 
   async function handleCreateTrip() {

@@ -71,7 +71,9 @@ export const getTripPageMetrics = createServerFn({ method: "GET" })
         referrer.set(r, (referrer.get(r) ?? 0) + 1);
       } else if (row.event === "click") {
         if (row.target === "announcement") metrics.announcementClicks += 1;
-        else metrics.bookingClicks += 1;
+        // "section" es navegación interna ("Ver itinerario"); no es intención de reserva.
+        // Los clics anteriores a esta distinción quedaron guardados como "booking".
+        else if (row.target !== "section") metrics.bookingClicks += 1;
       } else if (row.event === "form_start") metrics.formStarts += 1;
       else if (row.event === "form_submit") metrics.formSubmits += 1;
     }
