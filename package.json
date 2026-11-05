@@ -16,6 +16,7 @@
     "test:e2e": "playwright test",
     "test:e2e:times": "playwright test e2e/itinerary-times.spec.ts",
     "smoke": "playwright test -c playwright.smoke.config.ts",
+    "demo:sql": "bun scripts/demo/generate.ts",
     "assets:download": "node scripts/download-template-assets.mjs",
     "db:push": "supabase db push",
     "db:types": "supabase gen types typescript --linked --schema public > src/integrations/supabase/types.ts"
