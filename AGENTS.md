@@ -25,3 +25,4 @@
 
 - CTAs: every landing button resolves its destination (form | url | section) through one resolver keyed by a stable ctaId in `ctaLinks`; missing config inherits the legacy booking link. Why: one rule per button, never a broken or cross-trip link.
 - Text shown in several sections shares its content path but uses a per-placement `styleKey` for textStyles. Why: same information, independent colors/formatting per section.
+- Presentation mode is a read-time filter: every list of trips goes through `useVisibleTrips` and trip routes through `PresentationGuard`, so only `showcase` trips are visible; it never masks or rewrites data. Why: masked values could be saved over real ones; showcase trips carry fictitious travelers instead. New screens that list trips or people must apply the same filter.

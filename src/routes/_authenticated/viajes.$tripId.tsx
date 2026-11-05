@@ -54,6 +54,7 @@ import {
   Loader2,
   CircleAlert,
   Plane,
+  MonitorPlay,
 } from "lucide-react";
 
 import {
@@ -144,6 +145,7 @@ import {
   suggestLocalCurrency,
 } from "@/lib/finance-types";
 import { useTripsStore, useTripsRecord, saveTripNow, releaseTripCover } from "@/lib/trips-store";
+import { isShowcaseTrip, useVisibleTrips } from "@/lib/presentation-mode";
 import { usePermissions } from "@/lib/access";
 import { TripMembersDialog } from "@/components/TripMembersDialog";
 import { LogisticsTab } from "@/components/enrollees/LogisticsTab";
@@ -639,7 +641,21 @@ function TripHeader({
                   <Settings2 className="h-3.5 w-3.5" /> Acciones
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-44">
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuItem
+                  onSelect={() => {
+                    const next = !isShowcaseTrip(trip);
+                    updateTripMeta(trip.id, { showcase: next || undefined });
+                    toast.success(next ? "Viaje marcado como vitrina" : "El viaje ya no es vitrina", {
+                      description: next
+                        ? "Se muestra en modo presentación. Usa solo viajeras ficticias."
+                        : "Queda oculto en modo presentación.",
+                    });
+                  }}
+                >
+                  <MonitorPlay className="h-3.5 w-3.5 mr-2" />
+                  {isShowcaseTrip(trip) ? "Quitar de vitrina" : "Marcar como vitrina"}
+                </DropdownMenuItem>
                 <DropdownMenuItem
                   onSelect={(e) => {
                     e.preventDefault();
@@ -684,6 +700,11 @@ function TripHeader({
 
       <div className="relative mb-5 overflow-hidden rounded-xl border border-border/60">
         <div className="relative w-full aspect-[16/6] overflow-hidden">
+          {isShowcaseTrip(trip) && (
+            <span className="absolute left-3 top-3 z-10 inline-flex items-center gap-1 rounded-md bg-background/90 px-2 py-1 text-xs font-medium text-foreground shadow">
+              <MonitorPlay className="h-3.5 w-3.5 text-primary" /> Vitrina
+            </span>
+          )}
           {coverUrl ? (
             <img
               src={coverUrl}
@@ -5192,7 +5213,8 @@ function EnrolleeCard({
   const replaceExtraInstallments = useTripsStore((s) => s.replaceExtraInstallments);
   const markExtraInstallmentPaid = useTripsStore((s) => s.markExtraInstallmentPaid);
   const revertExtraInstallment = useTripsStore((s) => s.revertExtraInstallment);
-  const allTrips = useTripsRecord();
+  // En modo presentación, transferir créditos solo ofrece viajes vitrina.
+  const allTrips = useVisibleTrips(useTripsRecord());
   const [showCreateMissingDialog, setShowCreateMissingDialog] = useState(false);
   const [showCreditDialog, setShowCreditDialog] = useState(false);
   const [showAppliedCreditsDialog, setShowAppliedCreditsDialog] = useState(false);

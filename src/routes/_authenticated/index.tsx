@@ -13,7 +13,9 @@ import {
   Trash2,
   Inbox,
   Globe,
+  MonitorPlay,
 } from "lucide-react";
+import { isShowcaseTrip, usePresentationMode, useVisibleTrips } from "@/lib/presentation-mode";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -99,6 +101,7 @@ interface TripCardData {
   currency: string;
   coverGradient: string;
   coverImage?: string | null;
+  showcase?: boolean;
   isDeleted?: boolean;
   deletedAt?: string;
   purgeAt?: string;
@@ -121,6 +124,7 @@ function toCardData(t: TripData): TripCardData {
     currency: t.currency,
     coverGradient: t.coverGradient || "from-[oklch(0.45_0.05_60)] to-[oklch(0.30_0.03_60)]",
     coverImage: t.coverImage ?? null,
+    showcase: isShowcaseTrip(t),
     isDeleted: t.isDeleted,
     deletedAt: t.deletedAt,
     purgeAt: t.purgeAt,
@@ -166,6 +170,11 @@ function TripCard({ trip, canManage }: { trip: TripCardData; canManage: boolean 
               />
             ) : (
               <div className={`absolute inset-0 h-full w-full bg-gradient-to-br ${trip.coverGradient}`} />
+            )}
+            {trip.showcase && (
+              <span className="absolute left-2 top-2 z-10 inline-flex items-center gap-1 rounded-md bg-background/90 px-1.5 py-0.5 text-[11px] font-medium text-foreground shadow-sm">
+                <MonitorPlay className="h-3 w-3 text-primary" /> Vitrina
+              </span>
             )}
             <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-background/60 to-transparent" />
           </div>
@@ -351,7 +360,8 @@ function TripCard({ trip, canManage }: { trip: TripCardData; canManage: boolean 
 
 
 function TripsPage() {
-  const trips = useTripsStore((s) => s.trips);
+  const trips = useVisibleTrips(useTripsStore((s) => s.trips));
+  const presenting = usePresentationMode((s) => s.enabled);
   const hydrated = useTripsStore((s) => s.hydrated);
   const hydrating = useTripsStore((s) => s.hydrating);
   const loadError = useTripsStore((s) => s.loadError);
@@ -413,7 +423,20 @@ function TripsPage() {
         </Card>
       )}
 
-      {hydrated && cards.length === 0 && (
+      {hydrated && cards.length === 0 && presenting && (
+        <Card className="border-dashed border-2 border-border/60">
+          <CardContent className="p-10 flex flex-col items-center text-center gap-3">
+            <MonitorPlay className="h-8 w-8 text-primary" />
+            <h3 className="font-display text-lg font-semibold">No hay viajes vitrina</h3>
+            <p className="text-sm text-muted-foreground max-w-md">
+              Sal del modo presentación, abre un viaje con viajeras ficticias y márcalo como vitrina
+              desde su menú Acciones.
+            </p>
+          </CardContent>
+        </Card>
+      )}
+
+      {hydrated && cards.length === 0 && !presenting && (
         <Card className="border-dashed border-2 border-border/60 overflow-hidden">
           <img
             src={EMPTY_PHOTO.src}

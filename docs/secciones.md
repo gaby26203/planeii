@@ -21,6 +21,21 @@ Definido en `src/components/AppSidebar.tsx`. Las rutas están en `src/routes/_au
 | Ajustes y plantillas | `/ajustes` | Plantillas de reembolsos, presets de costos, métodos de pago, extras; nombre visible | Parcial: se usan reembolsos y presets de costos; métodos de pago y extras se guardan pero nadie los lee | `account_defaults`, `profiles` | Todas (el comentario dice "solo owners") |
 | Papelera | `/papelera` | Viajes borrados, restaurar, eliminar definitivo | Completa | `trips.data.isDeleted`, `deleteTrip` | Ruta abierta; botones solo para owner |
 
+### Modo presentación
+
+Para la demo guiada. Se activa desde el menú de la cuenta, al pie del menú lateral, y se recuerda
+en el navegador. Mientras está activo:
+
+- Una barra arriba avisa que el modo está activo y ofrece salir.
+- Viajes, Finanzas, Papelera y la transferencia de créditos solo muestran los viajes vitrina.
+- Las rutas de un viaje que no es vitrina y Gestión de accesos muestran un aviso en lugar de su
+  contenido.
+
+Un viaje es vitrina cuando tiene `showcase: true` en su JSON. La owner lo marca o desmarca desde
+Acciones en la cabecera del viaje. Las tarjetas y la cabecera muestran la etiqueta "Vitrina". El
+modo es solo un filtro de lectura (`src/lib/presentation-mode.ts`): no cambia ni enmascara datos.
+Por eso un viaje vitrina tiene que tener viajeras ficticias.
+
 ## Espacio de un viaje
 
 Ruta `/viajes/$tripId`, archivo `src/routes/_authenticated/viajes.$tripId.tsx` (unas 10.000

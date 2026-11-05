@@ -731,6 +731,11 @@ export interface TripData {
    * - `null` / `undefined` cuando no hay foto → se usa `coverGradient` como fallback.
    */
   coverImage?: string | null;
+  /**
+   * Viaje vitrina para la demo guiada: con viajeras ficticias y visible en modo presentación,
+   * que oculta todos los demás (ver `src/lib/presentation-mode.ts`).
+   */
+  showcase?: boolean;
 
   itinerary: ItineraryDay[];
   costs: CostItem[];
