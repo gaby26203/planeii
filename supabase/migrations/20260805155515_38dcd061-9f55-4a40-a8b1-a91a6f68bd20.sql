@@ -1,0 +1,2 @@
+ALTER TABLE public.trip_todos ADD COLUMN IF NOT EXISTS assigned_to uuid REFERENCES auth.users(id) ON DELETE SET NULL;
+CREATE INDEX IF NOT EXISTS trip_todos_assigned_to_idx ON public.trip_todos(assigned_to);

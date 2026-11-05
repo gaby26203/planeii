@@ -1,0 +1,48 @@
+# Lista de comprobación de un despliegue, a pedido: Actions → Comprobar despliegue → Run workflow.
+# GitHub solo muestra el botón cuando este archivo está en la rama principal.
+# Las credenciales de la cuenta de prueba van como secretos del repositorio:
+# SMOKE_EMAIL y SMOKE_PASSWORD. Sin ellos corren solo las comprobaciones públicas.
+name: Comprobar despliegue
+
+on:
+  workflow_dispatch:
+    inputs:
+      base_url:
+        description: "URL del despliegue, por ejemplo https://planeii.com"
+        required: true
+      slug:
+        description: "Slug de la landing de prueba (opcional)"
+        required: false
+        default: ""
+      write:
+        description: "Crear y borrar datos de prueba (viaje y solicitud)"
+        type: boolean
+        default: false
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: package.json
+      - run: bun install --frozen-lockfile
+      - run: bunx playwright install --with-deps chromium
+      - name: Comprobar
+        run: bun run smoke
+        env:
+          SMOKE_BASE_URL: ${{ inputs.base_url }}
+          SMOKE_SLUG: ${{ inputs.slug }}
+          SMOKE_WRITE: ${{ inputs.write && '1' || '' }}
+          SMOKE_EMAIL: ${{ secrets.SMOKE_EMAIL }}
+          SMOKE_PASSWORD: ${{ secrets.SMOKE_PASSWORD }}
+      - uses: actions/upload-artifact@v6
+        if: failure()
+        with:
+          name: reporte-comprobacion
+          path: |
+            playwright-report/smoke
+            test-results
+          retention-days: 7

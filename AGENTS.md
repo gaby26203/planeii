@@ -1,0 +1,27 @@
+# Architecture rules
+- Previews: standalone previews are visitor mode and load an expiring cloud snapshot (error if missing); only the embedded editor iframe accepts editing messages, requests the doc via `trip-editor-ready`, and uses same-origin postMessage for text/image/button actions.
+- Editor load order: backend draft → published document → localStorage. Autosave is debounced; last 20 published versions kept. Documents are versioned and normalized on read.
+- TripEditor's docRef must stay synced with the visible document; autosave and iframe posts read it, so a stale ref overwrites real content.
+- All document mutations go through one history helper (undo/redo, discard-to-published).
+- Content bases: non-Oaxaca and new documents normalize against `NEUTRAL_TRIP_DATA`; only docs marked `contentBase: "oaxaca-legacy"` use `OAXACA_LEGACY_DATA` (transitional). Why: no landing may inherit another trip's editorial content.
+- Neutral landing interface copy is declared independently and must never spread from `OAXACA_LEGACY_DATA`. Why: new copy fields cannot silently leak Oaxaca editorial content into other trips.
+- One in-flow layout for editor, preview and published page; editor CSS may add outlines/controls but never reposition content. Layouts respond via container queries to the canvas width.
+- Section alignment is exposed on the shared landing wrapper and aligns constrained copy and CTA groups without changing grid columns; this keeps the same axis in editor, preview and publication.
+- Visual Stories uses one continuous equal-column grid for all visible photos, with intrinsic-size images capped to the available width and no forced aspect ratio; this fills intermediate cells when expanding without upscaling or cropping.
+- Visual Stories expands its extra photos only in the embedded editing context; visitor preview and publication retain the shared show-more interaction. Why: all uploads remain reachable while editing without changing visitor presentation.
+- Text formatting is stored by path: block styles plus validated inline runs tied to the plain text; EditableText uses a single Tiptap inline root and shared visitor marks in landing/form/thanks. Commit text and runs together via history; migrate legacy block marks on first edit, reject stale runs. Mobile is visitor-only. Why: selection formatting persists without changing layout or form rules.
+- Sales-page colors flow through scoped CSS variables so they never change the app theme.
+- Headings: normal word wrap plus a shared observer that shrinks oversized whole words to their column.
+- Immersive cover/closing skip shared section padding; trip summary uses its own compact spacing token; meta items are ordered descriptors and an empty list stays empty.
+- Itinerary: days grouped into blocks, days before photos in DOM/mobile, desktop zig-zag via order; one shared controlled accordion.
+- Two-column sections keep the CTA after list content on narrow canvases via a display:contents heading wrapper (single button copy).
+- In editorPreview a capture listener intercepts CTA clicks and opens that section's Design controls; visitor pages navigate normally.
+- Announcement bar renders outside the container-query root; no ancestor may set container-type/transform/filter/contain. It measures its height to offset nav and dismisses per session.
+- Analytics: only /v/$slug tracks via POST /api/public/track (trip_page_events); editor/preview never track, and authenticated trip owners/organizadoras are discarded server-side. Metrics aggregate in src/lib/trip-metrics.functions.ts.
+- Pre-migration page backups go to `trip_page_backups` (read-only for the trip team).
+- Hero mobile framing is stored as optional image focus coordinates and applied only below the mobile breakpoint; desktop framing remains centered and old documents remain unchanged.
+- Booking form config lives in the landing document (`bookingForm`); docs without it default to external mode so old pages keep their link. Public submissions go only through /api/public/apply, validated against the published form; applications are member-only via RLS. Why: the published form is the single source of truth and visitors never read data.
+- Form defaults are independent per-document copies of a shared template, never loaded from another trip at runtime; normalization preserves explicit questions, including an empty list, so edits remain trip-specific.
+
+- CTAs: every landing button resolves its destination (form | url | section) through one resolver keyed by a stable ctaId in `ctaLinks`; missing config inherits the legacy booking link. Why: one rule per button, never a broken or cross-trip link.
+- Text shown in several sections shares its content path but uses a per-placement `styleKey` for textStyles. Why: same information, independent colors/formatting per section.

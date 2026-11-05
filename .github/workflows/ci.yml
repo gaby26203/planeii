@@ -1,0 +1,30 @@
+# Revisión automática de cada cambio: tipos, tests unitarios y build de producción.
+# ESLint queda fuera hasta formatear el repo en un commit aparte (ver docs/estado.md): hoy
+# reporta unos 3.300 avisos de formato heredados de Lovable y fallaría siempre.
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: package.json
+      - run: bun install --frozen-lockfile
+      - name: Tipos
+        run: bun run typecheck
+      - name: Tests unitarios
+        run: bun run test
+      - name: Build
+        run: bun run build
