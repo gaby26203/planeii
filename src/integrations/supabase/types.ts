@@ -837,11 +837,22 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_published_page: {
+        Args: { _slug: string }
+        Returns: {
+          document: Json
+          trip_id: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
+        Returns: boolean
+      }
+      is_trip_page_slug_available: {
+        Args: { _slug: string; _trip_id: string }
         Returns: boolean
       }
     }

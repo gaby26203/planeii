@@ -57,7 +57,8 @@ Puntos clave:
   páginas de venta, subidas) protegido solo por RLS. Las operaciones sensibles pasan por server
   functions que validan el JWT y, si hace falta, usan el cliente con service role.
 - **SSR sin sesión.** La sesión vive en `localStorage`; el SSR no la conoce. Por eso el layout
-  autenticado tiene `ssr: false` y las landings públicas leen con la clave publicable.
+  autenticado tiene `ssr: false` y las landings públicas leen con la clave publicable, una por su
+  slug, con la función `get_published_page`.
 - **Sin backend propio aparte del Worker.** No hay colas, cron ni Edge Functions. La purga de la
   papelera la hace el cliente al cargar.
 

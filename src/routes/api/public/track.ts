@@ -3,6 +3,11 @@ import { z } from "zod";
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
 import { isInternalTripAnalyticsActor } from "@/lib/trip-analytics-access";
+import { clientIp, createRateLimiter } from "@/lib/rate-limit";
+
+// Una visita real genera una vista y unos pocos clics. Más que esto desde la misma IP y para el
+// mismo viaje en cinco minutos no se cuenta.
+const limiter = createRateLimiter({ limit: 40, windowMs: 5 * 60 * 1000 });
 
 const payloadSchema = z.object({
   tripId: z.string().uuid(),
@@ -23,21 +28,29 @@ export const Route = createFileRoute("/api/public/track")({
           return new Response("Invalid payload", { status: 400 });
         }
 
+        // Sin IP (un proxy que no la informa) no se limita: todas las visitas caerían en la misma
+        // cuenta y se dejaría de contar a todo el mundo. En Cloudflare siempre viene.
+        const ip = clientIp(request.headers);
+        if (ip && !limiter.hit(`${ip}|${payload.tripId}`)) {
+          return new Response("Too many events", { status: 429 });
+        }
+
         const key = process.env["SUPABASE_PUBLISHABLE_KEY"]!;
         const url = process.env["SUPABASE_URL"]!;
-        const createServerClient = (authorization?: string) => createClient<Database>(url, key, {
-          auth: { persistSession: false },
-          global: {
-            ...(authorization ? { headers: { Authorization: authorization } } : {}),
-            fetch: (input, init) => {
-              const h = new Headers(init?.headers);
-              if (key.startsWith("sb_") && h.get("Authorization") === `Bearer ${key}`) h.delete("Authorization");
-              h.set("apikey", key);
-              return fetch(input, { ...init, headers: h });
+        const createServerClient = (authorization?: string) =>
+          createClient<Database>(url, key, {
+            auth: { persistSession: false },
+            global: {
+              ...(authorization ? { headers: { Authorization: authorization } } : {}),
+              fetch: (input, init) => {
+                const h = new Headers(init?.headers);
+                if (key.startsWith("sb_") && h.get("Authorization") === `Bearer ${key}`)
+                  h.delete("Authorization");
+                h.set("apikey", key);
+                return fetch(input, { ...init, headers: h });
+              },
             },
-          },
-        });
-        const supabasePublic = createServerClient();
+          });
 
         const authorization = request.headers.get("authorization");
         if (authorization) {
@@ -47,7 +60,8 @@ export const Route = createFileRoute("/api/public/track")({
           if (!token) return new Response("Invalid authorization", { status: 401 });
           const supabaseUser = createServerClient(`Bearer ${token}`);
           const { data: authData, error: authError } = await supabaseUser.auth.getUser(token);
-          if (authError || !authData.user) return new Response("Invalid authorization", { status: 401 });
+          if (authError || !authData.user)
+            return new Response("Invalid authorization", { status: 401 });
 
           const [tripResult, membershipResult] = await Promise.all([
             supabaseUser.from("trips").select("owner_id").eq("id", payload.tripId).maybeSingle(),
@@ -80,7 +94,18 @@ export const Route = createFileRoute("/api/public/track")({
           request.headers.get("x-country-code") ??
           null;
 
-        const { error } = await supabasePublic.from("trip_page_events").insert({
+        // Solo esta ruta escribe eventos: la base no acepta INSERT de anon ni de authenticated.
+        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+        const { data: page, error: pageError } = await supabaseAdmin
+          .from("trip_pages")
+          .select("trip_id")
+          .eq("trip_id", payload.tripId)
+          .limit(1)
+          .maybeSingle();
+        if (pageError) return new Response("Could not track", { status: 500 });
+        if (!page) return new Response("Unknown page", { status: 404 });
+
+        const { error } = await supabaseAdmin.from("trip_page_events").insert({
           trip_id: payload.tripId,
           event: payload.event,
           target: payload.target ?? null,
