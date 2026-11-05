@@ -56,7 +56,8 @@ En el panel de Supabase, sección Authentication:
 1. **URL Configuration.** Site URL con el dominio de producción. Redirect URLs:
    `https://<dominio>/auth**`, `https://<dominio>/reset-password` y `http://localhost:8080/**`.
    Si una URL falta, Supabase vuelve al Site URL y se pierde el parámetro `?invite`.
-2. **Confirmación de email activa.** La aceptación de invitaciones confía en el email del JWT.
+2. **Confirmación de email activa.** Las invitaciones solo se aceptan con el email confirmado de
+   la cuenta; sin confirmación, nadie que se registre podría aceptarlas.
 3. **Google.** En Google Cloud crea un OAuth Client de tipo Web con redirect
    `https://<ref>.supabase.co/auth/v1/callback`. Carga el client ID y el secret en
    Providers → Google.

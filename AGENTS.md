@@ -23,6 +23,7 @@
 - Pre-migration page backups go to `trip_page_backups` (read-only for the trip team).
 - Hero mobile framing is stored as optional image focus coordinates and applied only below the mobile breakpoint; desktop framing remains centered and old documents remain unchanged.
 - Published pages are read publicly only through `get_published_page(slug)`; `trip_pages` is readable only by the trip team and owners, and the editor checks slugs with `is_trip_page_slug_available`. Why: visitors can open a page by its link but cannot list every landing.
+- The `trip-activity:<tripId>` broadcast channel is private (`private: true` after `supabase.realtime.setAuth()`), authorized by `realtime.messages` policies for the trip team and owners. Invitations are accepted only with the account's confirmed email from Auth admin, never the JWT email alone. Why: outsiders cannot read or spoof live activity, and nobody can claim an invite by registering someone else's email.
 - Booking form config lives in the landing document (`bookingForm`); docs without it default to external mode so old pages keep their link. Public submissions go only through /api/public/apply, validated against the published form; applications are member-only via RLS. Why: the published form is the single source of truth and visitors never read data.
 - Form defaults are independent per-document copies of a shared template, never loaded from another trip at runtime; normalization preserves explicit questions, including an empty list, so edits remain trip-specific.
 

@@ -29,6 +29,20 @@ function randomToken(): string {
 const roleSchema = z.enum(["organizadora", "tour_leader"]);
 const permsSchema = z.record(z.string(), z.boolean()).nullable().optional();
 
+/**
+ * Email confirmado de la cuenta según Auth, no según el JWT. Una cuenta recién registrada con el
+ * email de otra persona no lo tiene confirmado, así que no puede aceptar invitaciones a ese email.
+ */
+async function confirmedEmailOf(userId: string): Promise<string | null> {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { data, error } = await supabaseAdmin.auth.admin.getUserById(userId);
+  if (error || !data.user?.email || !data.user.email_confirmed_at) return null;
+  return data.user.email.toLowerCase();
+}
+
+const CONFIRM_EMAIL_MESSAGE =
+  "Confirma tu correo antes de aceptar la invitación: abre el enlace que te enviamos al registrarte y vuelve a esta página.";
+
 // ============= Listar invitaciones de un viaje =============
 export const listTripInvitations = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
@@ -207,6 +221,7 @@ export const lookupTripInvitation = createServerFn({ method: "POST" })
 
     const jwtEmail = ((context.claims as any)?.email ?? "").toString().toLowerCase();
     const invEmail = (inv.email as string).toLowerCase();
+    const confirmedEmail = await confirmedEmailOf(context.userId);
 
     const now = Date.now();
     const expired = new Date(inv.expires_at as string).getTime() < now;
@@ -227,20 +242,22 @@ export const lookupTripInvitation = createServerFn({ method: "POST" })
       role: inv.role as "organizadora" | "tour_leader",
       status: inv.status as "pending" | "accepted" | "revoked",
       expired,
-      matchesEmail: jwtEmail === invEmail,
+      matchesEmail: confirmedEmail === invEmail,
+      needsEmailConfirmation: !confirmedEmail && jwtEmail === invEmail,
       currentEmail: jwtEmail || null,
       isMember: Boolean(mem),
     };
   });
-
 
 // ============= Aceptar invitación =============
 export const acceptTripInvitation = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) => z.object({ token: z.string().min(1) }).parse(input))
   .handler(async ({ data, context }) => {
-    const jwtEmail = ((context.claims as any)?.email ?? "").toString().toLowerCase();
-    if (!jwtEmail) throw new Error("Tu cuenta no tiene un email asociado.");
+    const tokenEmail = ((context.claims as any)?.email ?? "").toString().toLowerCase();
+    if (!tokenEmail) throw new Error("Tu cuenta no tiene un email asociado.");
+    const accountEmail = await confirmedEmailOf(context.userId);
+    if (!accountEmail) throw new Error(CONFIRM_EMAIL_MESSAGE);
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: inv, error } = await supabaseAdmin
@@ -250,7 +267,7 @@ export const acceptTripInvitation = createServerFn({ method: "POST" })
       .maybeSingle();
     if (error) throw new Error(error.message);
     if (!inv) throw new Error("Invitación no encontrada.");
-    if ((inv.email as string).toLowerCase() !== jwtEmail) {
+    if ((inv.email as string).toLowerCase() !== accountEmail) {
       throw new Error(
         `Esta invitación es para ${inv.email}. Inicia sesión con ese correo para aceptarla.`,
       );
@@ -282,10 +299,7 @@ export const acceptTripInvitation = createServerFn({ method: "POST" })
     // Asegurar profile para el nuevo usuario (por si el trigger no corrió).
     await supabaseAdmin
       .from("profiles")
-      .upsert(
-        { id: context.userId, email: jwtEmail },
-        { onConflict: "id" },
-      );
+      .upsert({ id: context.userId, email: accountEmail }, { onConflict: "id" });
 
     // Insertar en trip_members (usando admin: RLS de trip_members solo deja
     // a organizadoras / owners insertar; el invitado no cumple ese requisito).
@@ -315,19 +329,19 @@ export const acceptTripInvitation = createServerFn({ method: "POST" })
     await logAccessAudit({
       action: "invitation_accepted",
       actorId: context.userId,
-      actorEmail: jwtEmail,
+      actorEmail: accountEmail,
       tripId,
       targetUserId: context.userId,
-      targetEmail: jwtEmail,
+      targetEmail: accountEmail,
       details: { role: inv.role, permissions: (inv.permissions as any) ?? null },
     });
     await logAccessAudit({
       action: "member_added",
       actorId: context.userId,
-      actorEmail: jwtEmail,
+      actorEmail: accountEmail,
       tripId,
       targetUserId: context.userId,
-      targetEmail: jwtEmail,
+      targetEmail: accountEmail,
       details: { role: inv.role, permissions: (inv.permissions as any) ?? null, via: "invitation" },
     });
 
@@ -338,19 +352,19 @@ export const acceptTripInvitation = createServerFn({ method: "POST" })
 // Se llama al iniciar sesión / entrar a la app. Cierra cualquier invitación
 // `pending` no vencida cuyo email coincida con el de la cuenta, creando la
 // membresía correspondiente. Idempotente y seguro: solo actúa sobre el email
-// verificado del JWT del usuario que llama.
+// confirmado de la cuenta que llama, leído de Auth y no del JWT.
 export const acceptMyPendingInvitations = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const jwtEmail = ((context.claims as any)?.email ?? "").toString().toLowerCase();
-    if (!jwtEmail) return { accepted: [] as string[] };
+    const accountEmail = await confirmedEmailOf(context.userId);
+    if (!accountEmail) return { accepted: [] as string[] };
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const nowIso = new Date().toISOString();
     const { data: rows, error } = await supabaseAdmin
       .from("trip_invitations")
       .select("id, trip_id, role, permissions")
-      .eq("email", jwtEmail)
+      .eq("email", accountEmail)
       .eq("status", "pending")
       .gt("expires_at", nowIso);
     if (error) throw new Error(error.message);
@@ -358,7 +372,7 @@ export const acceptMyPendingInvitations = createServerFn({ method: "POST" })
 
     await supabaseAdmin
       .from("profiles")
-      .upsert({ id: context.userId, email: jwtEmail }, { onConflict: "id" });
+      .upsert({ id: context.userId, email: accountEmail }, { onConflict: "id" });
 
     const accepted: string[] = [];
     const { logAccessAudit } = await import("@/lib/access-audit.server");
@@ -385,10 +399,10 @@ export const acceptMyPendingInvitations = createServerFn({ method: "POST" })
       await logAccessAudit({
         action: "invitation_accepted",
         actorId: context.userId,
-        actorEmail: jwtEmail,
+        actorEmail: accountEmail,
         tripId: inv.trip_id as string,
         targetUserId: context.userId,
-        targetEmail: jwtEmail,
+        targetEmail: accountEmail,
         details: { role: inv.role, via: "auto_on_login" },
       });
     }

@@ -4,6 +4,10 @@
 // broadcast efímero por el canal `trip-activity:<tripId>`. Los demás clientes
 // que tienen ese viaje abierto muestran un toast breve ("Ana actualizó
 // Itinerario & Costos"). No se persiste nada en la base de datos.
+//
+// El canal es privado: Realtime solo deja escuchar o enviar al equipo del viaje
+// (políticas sobre `realtime.messages`). Por eso cada canal se abre con
+// `private: true` después de pasarle a Realtime el token de la sesión.
 
 import { useEffect } from "react";
 import { toast } from "sonner";
@@ -71,6 +75,12 @@ export function resetTripActivityActor() {
 // ── Emisión ──
 const channelName = (tripId: string) => `trip-activity:${tripId}`;
 
+function openTripChannel(tripId: string) {
+  return supabase.channel(channelName(tripId), {
+    config: { private: true, broadcast: { self: false } },
+  });
+}
+
 /**
  * Anuncia a los demás clientes que este usuario acaba de guardar un cambio.
  * Silencioso ante errores: nunca debe romper el guardado.
@@ -80,9 +90,8 @@ export async function notifyTripActivity(tripId: string): Promise<void> {
   try {
     const actor = await getActor();
     if (!actor) return;
-    const channel = supabase.channel(channelName(tripId), {
-      config: { broadcast: { self: false } },
-    });
+    await supabase.realtime.setAuth();
+    const channel = openTripChannel(tripId);
     await new Promise<void>((resolve) => {
       let settled = false;
       let removed = false;
@@ -145,9 +154,7 @@ export function useTripActivity(tripId: string | undefined) {
       if (!cancelled) myId = a?.id ?? null;
     });
 
-    const channel = supabase.channel(channelName(tripId), {
-      config: { broadcast: { self: false } },
-    });
+    const channel = openTripChannel(tripId);
 
     channel.on("broadcast", { event: "trip-change" }, ({ payload }) => {
       const actorId = (payload as { actorId?: string })?.actorId ?? null;
@@ -168,7 +175,13 @@ export function useTripActivity(tripId: string | undefined) {
       lastToast.set(key, { id, at: now });
     });
 
-    channel.subscribe();
+    // El canal privado necesita el token de la sesión antes de unirse.
+    void supabase.realtime
+      .setAuth()
+      .catch(() => undefined)
+      .then(() => {
+        if (!cancelled) channel.subscribe();
+      });
 
     let removed = false;
     return () => {
