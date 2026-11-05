@@ -18,7 +18,9 @@
     "smoke": "playwright test -c playwright.smoke.config.ts",
     "assets:download": "node scripts/download-template-assets.mjs",
     "db:push": "supabase db push",
-    "db:types": "supabase gen types typescript --linked --schema public > src/integrations/supabase/types.ts"
+    "db:types": "supabase gen types typescript --linked --schema public > src/integrations/supabase/types.ts",
+    "migrate:storage": "bun scripts/migrate-storage.ts",
+    "migrate:verify": "bun scripts/verify-migration.ts"
   },
   "dependencies": {
     "@ai-sdk/openai": "^4.0.85",

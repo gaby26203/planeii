@@ -232,4 +232,11 @@ flowchart LR
   OUT --> DEPLOY["bun run deploy<br/>wrangler deploy"]
   DEPLOY --> CF["Cloudflare Workers<br/>vars y secrets del Worker"]
   MIG["supabase/migrations"] -->|"supabase db push"| SB["Proyecto Supabase"]
+  OLD["Proyecto de Lovable Cloud<br/>(origen, hasta el corte)"] -->|"volcado de Postgres"| SB
+  OLD -->|"bun run migrate:storage<br/>3 buckets, mismas rutas"| SB
+  VER["bun run migrate:verify<br/>filas por tabla y objetos por bucket"] -.->|"compara"| OLD
+  VER -.->|"compara"| SB
 ```
+
+La copia de datos del corte se hace una sola vez, con la service role de los dos proyectos. Los
+pasos están en [migracion.md](migracion.md#3-datos).

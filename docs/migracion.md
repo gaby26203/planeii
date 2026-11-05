@@ -123,9 +123,70 @@ los ids de usuario cambiarían. Habría que reasignar `trips.owner_id`, `trip_me
 las rutas de Storage que llevan el uid y demás referencias. Este camino necesita un script de
 reasignación que no está incluido.
 
-**Archivos de Storage.** Hay que copiar los objetos de los tres buckets manteniendo las mismas
-rutas, porque llevan dentro el uid y el id del viaje. Con la clave de service role de ambos
-proyectos se puede hacer con la API de Storage (listar, descargar, subir).
+**Archivos de Storage.** Ningún volcado trae los archivos. Los objetos de `trip-covers`,
+`trip-notes-docs` y `trip-page-images` se copian con `scripts/migrate-storage.ts`, que mantiene las
+mismas rutas (llevan dentro el uid y el id del viaje), el tipo de contenido y el `cacheControl`.
+Después, `scripts/verify-migration.ts` confirma que llegó todo. Los dos usan la URL y la clave
+service role de cada proyecto (Project Settings → API keys). Esas claves saltan RLS: guárdalas en
+un archivo local que git ignora, por ejemplo `.env.migracion`, y no en `.env`:
+
+```bash
+SOURCE_SUPABASE_URL=https://<ref de Lovable Cloud>.supabase.co
+SOURCE_SERVICE_ROLE_KEY=<service role del origen>
+TARGET_SUPABASE_URL=https://<ref nuevo>.supabase.co
+TARGET_SERVICE_ROLE_KEY=<service role del destino>
+```
+
+```bash
+bun --env-file=.env.migracion run migrate:storage --dry-run   # lista qué copiaría, sin escribir
+bun --env-file=.env.migracion run migrate:storage             # copia
+bun --env-file=.env.migracion run migrate:verify              # compara origen y destino
+```
+
+`migrate:storage` recorre todas las carpetas de cada bucket, copia 4 objetos a la vez
+(`--concurrency=N` lo cambia) y salta lo que ya está en el destino con la misma ruta y el mismo
+tamaño. Por eso puedes interrumpirlo y volver a correrlo: sigue donde quedó. Comparar por tamaño
+basta porque la app nunca reescribe una ruta: cada subida usa un nombre nuevo. Al final imprime,
+por bucket, cuántos objetos copió, saltó y fallaron, con la ruta y el motivo de cada fallo, y sale
+con código 1 si algo falló.
+
+`migrate:verify` cuenta las filas de cada tabla de `public` y los objetos de cada bucket en los dos
+proyectos, y sale con código 1 si algo difiere. En los buckets agrega la columna "Por copiar": lo
+que `migrate:storage` todavía copiaría. Tiene que dar 0 aunque los conteos coincidan.
+
+Orden el día del corte:
+
+1. Despublica la app en Lovable para que nadie siga escribiendo en el origen (paso 1 del
+   [corte](#9-corte)). Si el origen cambia durante la copia, los conteos no van a coincidir.
+2. Restaura el volcado en el destino (opción A o B). La migración
+   `20261015120000_self_hosting_storage_and_grants.sql` tiene que quedar aplicada: crea los buckets.
+3. `migrate:storage --dry-run`: revisa cuántos objetos va a copiar y que no falte ningún bucket.
+4. `migrate:storage`, hasta que el resumen diga "Todo copiado.".
+5. `migrate:verify`, hasta que diga "Todo coincide.". Solo entonces apunta el dominio al Worker
+   nuevo.
+
+Con la opción B puedes correr el paso 4 unos días antes, porque ese volcado no toca Storage: el día
+del corte solo se copia lo que se subió después. Con la opción A, copia después de la restauración
+final. Si ese volcado incluye el esquema `storage`, trae las filas de `storage.objects` sin los
+archivos; el script las reconoce (mismo id y misma fecha que en el origen) y sube esos archivos de
+todos modos.
+
+Las copias quedan sin `owner` en `storage.objects`, porque las sube la service role. No afecta: las
+políticas de Storage de la app miran la ruta, no el `owner`.
+
+Si algo falla:
+
+| Mensaje o diferencia | Qué hacer |
+|---|---|
+| El bucket no existe en el destino | Aplica la migración del paso 2 con `psql "$DESTINO" -f supabase/migrations/20261015120000_self_hosting_storage_and_grants.sql` y vuelve a correr. |
+| No se pudo leer la lista de buckets, o `HTTP 401` / `HTTP 403` | La URL o la clave están mal. Tiene que ser la service role (`service_role` o `sb_secret_…`), no la anon ni la publishable. |
+| Un objeto falla al descargar o subir por red o tiempo de espera | Vuelve a correr `migrate:storage`: salta lo ya copiado y reintenta solo lo pendiente. |
+| El destino rechaza un objeto por tipo o tamaño | Puede que en Lovable el bucket aceptara más que la migración (5 MB y JPG, PNG o WebP en portadas y fotos de landing; 25 MB en documentos). Amplía ese bucket en el panel (Storage, menú del bucket, Edit bucket) y vuelve a correr. |
+| Una tabla tiene menos filas en el destino | La restauración falló en esa tabla: busca su error en la salida de `psql`, por ejemplo `trip_applications.duplicate_of`, y vuelve a cargarla. O el origen recibió filas después del volcado: repítelo. |
+| Una tabla tiene más filas en el destino | Alguien escribió en el destino, por ejemplo con `SMOKE_WRITE=1`, o se borraron filas en el origen después del volcado. |
+| `trip_page_preview_snapshots` tiene menos filas en el destino | Cada inserción en esa tabla borra las vistas previas vencidas, y la restauración también inserta. No afecta. |
+| "sin conteo… ¿existe la tabla?" | Falta la tabla en el destino: no se aplicaron todas las migraciones. |
+| Un bucket con objetos "por copiar" | Vuelve a correr `migrate:storage`. |
 
 **Primer owner.** Si arrancas sin datos, regístrate en la app y ejecuta
 `supabase/snippets/grant-owner.sql` con tu email en el SQL editor. Sin esa fila nadie puede
@@ -223,6 +284,7 @@ El resto se revisa a mano:
 
 ### 9. Corte
 
-1. Apunta el dominio al Worker nuevo.
-2. Despublica la app en Lovable para que nadie siga escribiendo en la base vieja.
-3. Si hubo actividad entre la copia de datos y el corte, repite la copia de datos antes de abrir.
+1. Despublica la app en Lovable para que nadie siga escribiendo en la base vieja.
+2. Si hubo actividad desde la última copia, repítela como dice la [sección 3](#3-datos): volcado,
+   `migrate:storage` (solo copia lo nuevo) y `migrate:verify`.
+3. Apunta el dominio al Worker nuevo.
