@@ -12,10 +12,10 @@ La app compila, pasa el typecheck y sus tests unitarios. Funcionalmente está ma
 el espacio de trabajo de cada viaje (costos, viajeras, pagos, notas) y el editor de páginas de
 venta con su formulario público. Cinco de las once secciones del menú están vacías.
 
-Los problemas más serios no son de build sino de **seguridad en la base de datos**. Los viajes,
-sus miembros y la analítica ya solo se escriben a través del servidor, y las landings ya no se
-pueden listar. El punto abierto más importante es que las finanzas viajan completas a todos los
-miembros.
+Los problemas más serios no eran de build sino de **seguridad en la base de datos**. Ya están
+cerrados: los viajes, sus miembros y la analítica solo se escriben a través del servidor, el JSON
+del viaje solo se lee desde el servidor (sin montos para quien no tiene "Ver finanzas"), las
+landings no se pueden listar y el canal de actividad es privado. Quedan puntos menores.
 
 | Comprobación | Exportación de Lovable | Versión migrada |
 |---|---|---|
@@ -53,14 +53,13 @@ El formato se arregla con `bun run format`, conviene hacerlo en un commit aparte
 
 ## Seguridad
 
-Ordenado por gravedad.
+Quedan puntos menores, leídos en el código y sin reproducir:
 
-1. **El permiso de finanzas solo oculta la interfaz.** Leído: `listMyTrips` devuelve el JSON
-   completo, con finanzas y datos personales de viajeras, a cualquier miembro.
-2. **Otros menores.** Leído: cada usuaria puede editar su `profiles.email` (que se usa para los
-   avisos de solicitudes); `generateSalesCopy` solo exige sesión y el registro está abierto;
-   `/api/public/page-image/*` sirve cualquier ruta válida del bucket aunque la página no esté
-   publicada; `has_role` permite averiguar quién es owner.
+- Cada usuaria puede editar su `profiles.email`, que se usa para los avisos de solicitudes.
+- `generateSalesCopy` solo exige sesión, y el registro está abierto.
+- `/api/public/page-image/*` sirve cualquier ruta válida del bucket aunque la página no esté
+  publicada.
+- `has_role` permite averiguar quién es owner.
 
 Ya corregido: los viajes solo se actualizan desde `updateTripData`, que escribe con la clave de
 servicio después de validar (`20261105120000_trips_write_via_server.sql`). Antes, cualquier
@@ -93,6 +92,12 @@ También corregido:
   (`20261105150000_private_trip_activity_channel.sql`).
 - **Invitaciones.** Se aceptaban comparando el email del JWT, sin mirar si estaba confirmado. Ahora
   el servidor pide el email confirmado a Auth; una cuenta sin confirmar ve un aviso para hacerlo.
+- **Finanzas** (`20261105160000_trip_data_server_only.sql`). `listMyTrips` mandaba el JSON
+  completo a cualquier miembro, y aunque no lo hiciera, `trips.data` se podía pedir directo por
+  PostgREST o llegaba en cada evento de Realtime. Ahora `data` no se puede leer con la sesión; el
+  servidor lo manda sin montos de costos ni costo de extras a quien no tiene "Ver finanzas", y
+  `trips` salió de Realtime (avisa `trip_change_signals`, sin contenido). Los datos de viajeras y
+  sus pagos siguen visibles para el equipo, porque se trabajan desde la pestaña Viajeras.
 
 Las notas de costo, que antes se mostraban sin sanear, pasan por `sanitizeNoteHtml`
 (`src/lib/sanitize-note-html.ts`): solo quedan etiquetas de formato y enlaces http, https o mailto.
@@ -124,8 +129,8 @@ Las notas de costo, que antes se mostraban sin sanear, pasan por `sanitizeNoteHt
 ## Deuda técnica
 
 - **Todo el viaje en un JSON.** `trips.data` se guarda entero en cada cambio y gana la última
-  escritura. Cada evento de Realtime vuelve a pedir todos los viajes, y `REPLICA IDENTITY FULL`
-  transmite el JSON completo. Escala mal con muchas viajeras o mucha edición simultánea.
+  escritura. Cada aviso de cambio en Realtime vuelve a pedir todos los viajes. Escala mal con
+  muchas viajeras o mucha edición simultánea.
 - **Archivo de 10.000 líneas.** `viajes.$tripId.tsx` mezcla cabecera, costos, viajeras, pagos,
   extras, créditos y resumen. Cortes naturales: `header/`, `costs/`, `enrollees/` (con
   `payments/`, `extras/`, `credits/`), `summary/`.
@@ -150,5 +155,4 @@ Las notas de costo, que antes se mostraban sin sanear, pasan por `sanitizeNoteHt
 ## Próximos pasos recomendados
 
 1. Completar la puesta en marcha de [migracion.md](migracion.md).
-2. Filtrar las finanzas en `listMyTrips`.
-3. Formatear todo el repo en un commit aparte y partir `viajes.$tripId.tsx`.
+2. Formatear todo el repo en un commit aparte y partir `viajes.$tripId.tsx`.

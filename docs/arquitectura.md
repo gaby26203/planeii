@@ -29,7 +29,7 @@ flowchart LR
 
   subgraph Supabase
     AUTH["Auth<br/>email + Google"]
-    PG[("Postgres + RLS<br/>19 tablas")]
+    PG[("Postgres + RLS<br/>20 tablas")]
     ST[("Storage<br/>trip-covers · trip-notes-docs · trip-page-images")]
     RT["Realtime<br/>postgres_changes + broadcast"]
   end
@@ -146,6 +146,7 @@ erDiagram
   trips ||--o{ trip_page_preview_snapshots : "vista previa 24 h"
   trips ||--o{ trip_page_events : "analítica"
   trips ||--o{ trip_page_backups : "respaldos"
+  trips ||--o| trip_change_signals : "aviso de cambio (Realtime)"
   trips ||--o{ trip_applications : "solicitudes"
   trip_applications ||--o{ trip_application_notes : ""
   trip_applications ||--o{ trip_application_events : ""
@@ -218,7 +219,7 @@ flowchart LR
   ORGA & TL --> CHK["Dónde se comprueba"]
   CHK --> C1["Cliente: AccessGate, usePermissions<br/>(solo oculta UI)"]
   CHK --> C2["Servidor: updateTripData compara<br/>JSON viejo vs nuevo (requiredWriteScopes)<br/>y escribe con service role"]
-  CHK --> C3["RLS: lectura por miembro / dueña / owner;<br/>sin escritura directa de trips ni trip_members"]
+  CHK --> C3["RLS: lectura por miembro / dueña / owner;<br/>sin escritura directa de trips ni trip_members;<br/>trips.data solo por servidor"]
 ```
 
 Los 8 permisos finos están en `src/lib/trip-permissions.ts`. La base de datos no los conoce: los

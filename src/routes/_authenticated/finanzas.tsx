@@ -42,6 +42,7 @@ import {
   getTripBaseCurrency,
 } from "@/lib/finance-types";
 import { useTripsStore, useTripsRecord } from "@/lib/trips-store";
+import { useCanSeeTripFinance } from "@/lib/access";
 import { aggregateEnrollees, calculateTripFinancials, isOverdue } from "@/lib/finance";
 
 export const Route = createFileRoute("/_authenticated/finanzas")({
@@ -85,13 +86,17 @@ function FinanzasPage() {
   const tripsRecord = useVisibleTrips(useTripsRecord());
   // Derivamos la lista para el selector con useMemo: estable mientras
   // tripsRecord no cambie de referencia (Zustand garantiza referencia estable).
+  // Solo viajes con "Ver finanzas": en los demás el servidor no manda los montos de costos.
+  const canSeeTripFinance = useCanSeeTripFinance();
   const tripsList = useMemo(
     () =>
-      Object.values(tripsRecord).map((t) => ({
-        id: t.id,
-        name: t.name,
-      })),
-    [tripsRecord],
+      Object.values(tripsRecord)
+        .filter((t) => canSeeTripFinance(t.id))
+        .map((t) => ({
+          id: t.id,
+          name: t.name,
+        })),
+    [tripsRecord, canSeeTripFinance],
   );
   const defaultTripId = tripsList[0]?.id ?? "";
   const [selectedTripIdRaw, setSelectedTripId] = useState<string>("");

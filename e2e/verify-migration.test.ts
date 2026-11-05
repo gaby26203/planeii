@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import {
+  ALL_TABLES,
   PUBLIC_TABLES,
   collectCounts,
   compareCounts,
@@ -66,7 +67,13 @@ describe("lista de tablas", () => {
     const block = types.slice(types.indexOf("  public: {"), types.indexOf("    Views: {"));
     const names = [...block.matchAll(/^ {6}([a-z_]+): \{$/gm)].map((m) => m[1]).sort();
     expect(names.length).toBeGreaterThan(10);
-    expect(PUBLIC_TABLES).toEqual(names as typeof PUBLIC_TABLES);
+    expect(ALL_TABLES).toEqual(names as typeof ALL_TABLES);
+  });
+
+  test("no compara tablas derivadas que el origen no tiene", () => {
+    expect(ALL_TABLES).toContain("trip_change_signals");
+    expect(PUBLIC_TABLES).not.toContain("trip_change_signals");
+    expect(PUBLIC_TABLES).toContain("trips");
   });
 });
 

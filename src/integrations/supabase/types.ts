@@ -297,6 +297,21 @@ export type Database = {
           },
         ]
       }
+      trip_change_signals: {
+        Row: {
+          changed_at: string
+          trip_id: string
+        }
+        Insert: {
+          changed_at?: string
+          trip_id: string
+        }
+        Update: {
+          changed_at?: string
+          trip_id?: string
+        }
+        Relationships: []
+      }
       trip_documents: {
         Row: {
           created_at: string

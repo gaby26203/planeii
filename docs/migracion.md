@@ -152,7 +152,8 @@ por bucket, cuántos objetos copió, saltó y fallaron, con la ruta y el motivo 
 con código 1 si algo falló.
 
 `migrate:verify` cuenta las filas de cada tabla de `public` y los objetos de cada bucket en los dos
-proyectos, y sale con código 1 si algo difiere. En los buckets agrega la columna "Por copiar": lo
+proyectos, y sale con código 1 si algo difiere. No compara `trip_change_signals`: solo existe en el
+proyecto nuevo y la llena un trigger. En los buckets agrega la columna "Por copiar": lo
 que `migrate:storage` todavía copiaría. Tiene que dar 0 aunque los conteos coincidan.
 
 Orden el día del corte:

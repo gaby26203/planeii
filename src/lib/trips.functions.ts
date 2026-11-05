@@ -12,6 +12,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 import { normalize, type TripPermMap } from "@/lib/trip-permissions";
 import { requiredWriteScopes, writeScopeError } from "@/lib/trip-write-scopes";
+import { redactFinance, restoreHiddenFinance } from "@/lib/trip-finance-visibility";
 
 type JsonValue = string | number | boolean | null | JsonValue[] | { [key: string]: JsonValue };
 
@@ -76,25 +77,66 @@ async function loadEffectivePerms(
 
 /**
  * Devuelve todos los viajes visibles para el usuario autenticado.
- * RLS ya filtra por membresía/ownership.
+ * RLS decide qué viajes ve; la columna `data` no se puede leer con la sesión de la usuaria, así
+ * que se trae con service role y, si no tiene "Ver finanzas" en un viaje, sin montos de costos.
  */
 export const listMyTrips = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { data, error } = await context.supabase
+    const [visibleRes, ownerRes, membershipsRes] = await Promise.all([
+      context.supabase
+        .from("trips")
+        .select("id, owner_id")
+        .order("created_at", { ascending: false }),
+      context.supabase.rpc("has_role", { _user_id: context.userId, _role: "owner" }),
+      context.supabase
+        .from("trip_members")
+        .select("trip_id, role, permissions")
+        .eq("user_id", context.userId),
+    ]);
+    if (visibleRes.error) throw new Error(visibleRes.error.message);
+    if (ownerRes.error) throw new Error(ownerRes.error.message);
+    if (membershipsRes.error) throw new Error(membershipsRes.error.message);
+    const visible = visibleRes.data ?? [];
+    if (visible.length === 0) return [];
+
+    const isOwner = !!ownerRes.data;
+    const financeByTrip = new Map(
+      (membershipsRes.data ?? []).map((m) => [
+        m.trip_id as string,
+        normalize(m.permissions, m.role as "organizadora" | "tour_leader").ver_finanzas,
+      ]),
+    );
+    const seesFinance = (tripId: string, ownerId: string) =>
+      isOwner || ownerId === context.userId || financeByTrip.get(tripId) === true;
+
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data, error } = await supabaseAdmin
       .from("trips")
       .select("id, name, destination, start_date, end_date, status, data")
-      .order("created_at", { ascending: false });
+      .in(
+        "id",
+        visible.map((v) => v.id as string),
+      );
     if (error) throw new Error(error.message);
-    return (data ?? []).map((r: any) => ({
-      id: r.id as string,
-      name: r.name as string | null,
-      destination: r.destination as string | null,
-      startDate: r.start_date as string | null,
-      endDate: r.end_date as string | null,
-      status: r.status as string | null,
-      data: r.data as JsonValue,
-    }));
+    const byId = new Map((data ?? []).map((r) => [r.id as string, r]));
+
+    return visible.flatMap((v) => {
+      const r = byId.get(v.id as string);
+      if (!r) return [];
+      const full = seesFinance(r.id as string, v.owner_id as string);
+      return [
+        {
+          id: r.id as string,
+          name: r.name as string | null,
+          destination: r.destination as string | null,
+          startDate: r.start_date as string | null,
+          endDate: r.end_date as string | null,
+          status: r.status as string | null,
+          data: (full ? r.data : redactFinance(r.data)) as JsonValue,
+        },
+      ];
+    });
   });
 
 /**
@@ -173,8 +215,18 @@ export const updateTripData = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) => tripPayloadSchema.parse(input))
   .handler(async ({ data, context }) => {
-    // Se lee con la sesión de quien guarda: si la RLS no le deja ver el viaje, no existe.
-    const { data: existing, error: readErr } = await context.supabase
+    // Con la sesión de quien guarda: si la RLS no le deja ver el viaje, no existe.
+    const { data: visible, error: visErr } = await context.supabase
+      .from("trips")
+      .select("id")
+      .eq("id", data.id)
+      .maybeSingle();
+    if (visErr) throw new Error(visErr.message);
+    if (!visible) throw new Error("Viaje no encontrado.");
+
+    // `data` solo se lee con service role.
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: existing, error: readErr } = await supabaseAdmin
       .from("trips")
       .select("data")
       .eq("id", data.id)
@@ -188,14 +240,21 @@ export const updateTripData = createServerFn({ method: "POST" })
       data.id,
     );
 
+    let incoming = data;
     if (!isOwner && !isTripOwner) {
       if (!isMember) throw new Error("No eres miembro de este viaje.");
-      const denied = writeScopeError(requiredWriteScopes(existing.data, data.data), perms);
+      // Sin "Ver finanzas" el cliente nunca recibió los montos: se reponen del viaje guardado.
+      if (!perms?.ver_finanzas) {
+        incoming = { ...data, data: restoreHiddenFinance(existing.data, data.data) };
+      }
+      const denied = writeScopeError(requiredWriteScopes(existing.data, incoming.data), perms);
       if (denied) throw new Error(denied);
     }
 
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin.from("trips").update(rowFromBlob(data)).eq("id", data.id);
+    const { error } = await supabaseAdmin
+      .from("trips")
+      .update(rowFromBlob(incoming))
+      .eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true as const };
   });

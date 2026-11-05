@@ -21,13 +21,17 @@ export type PublicTable = keyof Database["public"]["Tables"];
 
 // Con Record, el compilador exige todas las tablas de types.ts. Como `bun run typecheck` no
 // revisa scripts/, e2e/verify-migration.test.ts compara esta lista con types.ts.
-const TABLES: Record<PublicTable, true> = {
+// `false` marca una tabla derivada: existe solo en el destino y se llena sola, así que no se
+// compara con el origen.
+const TABLES: Record<PublicTable, boolean> = {
   access_audit_log: true,
   account_defaults: true,
   profiles: true,
   trip_application_events: true,
   trip_application_notes: true,
   trip_applications: true,
+  // La llena un trigger de `trips` para avisar cambios por Realtime; Lovable no la tiene.
+  trip_change_signals: false,
   trip_documents: true,
   trip_invitations: true,
   trip_members: true,
@@ -43,7 +47,10 @@ const TABLES: Record<PublicTable, true> = {
   user_roles: true,
 };
 
-export const PUBLIC_TABLES = (Object.keys(TABLES) as PublicTable[]).sort();
+/** Todas las tablas de `public` que conoce el script, comparadas o no. */
+export const ALL_TABLES = (Object.keys(TABLES) as PublicTable[]).sort();
+/** Tablas cuyas filas se comparan entre origen y destino. */
+export const PUBLIC_TABLES = ALL_TABLES.filter((t) => TABLES[t]);
 
 export type Count = { ok: true; value: number } | { ok: false; error: string };
 

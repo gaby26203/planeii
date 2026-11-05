@@ -99,7 +99,8 @@ interface Props {
 export function ProvidersTab({ tripId, providers, costs, trip }: Props) {
   const baseCurrency = getTripBaseCurrency(trip);
   const list = providers ?? [];
-  const { canEditProveedores } = usePermissions(tripId);
+  // Sin "Ver finanzas" el servidor manda los costos sin montos: no se muestran cifras en $0.
+  const { canEditProveedores, canSeeFinances } = usePermissions(tripId);
   const addProvider = useTripsStore((s) => s.addProvider);
   const updateProvider = useTripsStore((s) => s.updateProvider);
   const removeProvider = useTripsStore((s) => s.removeProvider);
@@ -179,7 +180,7 @@ export function ProvidersTab({ tripId, providers, costs, trip }: Props) {
             <span className="text-muted-foreground">
               · <strong className="text-foreground">{counts.pagado}</strong> pagados
             </span>
-            {committedUSD > 0 && (
+            {canSeeFinances && committedUSD > 0 && (
               <span className="text-muted-foreground">
                 · <strong className="text-foreground">{formatMoney(committedUSD, baseCurrency)}</strong> comprometido
               </span>
@@ -307,23 +308,25 @@ export function ProvidersTab({ tripId, providers, costs, trip }: Props) {
                                 <span className="truncate max-w-[180px]" title={c.description}>
                                   {c.description}
                                 </span>
-                                <span className="text-muted-foreground shrink-0">
-                                  · {formatMoney(costBaseAmount(c, trip) * (c.perPerson ? travelers : 1), baseCurrency)}
-                                </span>
+                                {canSeeFinances && (
+                                  <span className="text-muted-foreground shrink-0">
+                                    · {formatMoney(costBaseAmount(c, trip) * (c.perPerson ? travelers : 1), baseCurrency)}
+                                  </span>
+                                )}
                               </div>
                             ))}
                           </div>
                         )}
                       </TableCell>
                       <TableCell className="hidden md:table-cell text-xs text-right">
-                        {linked.length > 0 ? (
+                        {canSeeFinances && linked.length > 0 ? (
                           <span className="font-medium">{formatMoney(perGroup, baseCurrency)}</span>
                         ) : (
                           <span className="text-muted-foreground">—</span>
                         )}
                       </TableCell>
                       <TableCell className="hidden lg:table-cell text-xs text-right">
-                        {linked.length > 0 ? (
+                        {canSeeFinances && linked.length > 0 ? (
                           <span className="text-muted-foreground">
                             {formatMoney(perPerson, baseCurrency)} <span className="text-[10px]">/ pers</span>
                           </span>
@@ -374,6 +377,7 @@ export function ProvidersTab({ tripId, providers, costs, trip }: Props) {
           initial={editing}
           costs={costs}
           trip={trip}
+          showAmounts={canSeeFinances}
           onClose={() => {
             setCreating(false);
             setEditing(null);
@@ -428,11 +432,12 @@ interface DialogProps {
   initial: Provider | null;
   costs: CostItem[];
   trip: TripData;
+  showAmounts: boolean;
   onClose: () => void;
   onSave: (values: Omit<Provider, "id" | "createdAt">) => void;
 }
 
-function ProviderDialog({ open, initial, costs, trip, onClose, onSave }: DialogProps) {
+function ProviderDialog({ open, initial, costs, trip, showAmounts, onClose, onSave }: DialogProps) {
   const baseCurrency = getTripBaseCurrency(trip);
   const [name, setName] = useState(initial?.name ?? "");
   const [category, setCategory] = useState<ProviderCategory>(initial?.category ?? "alojamiento");
@@ -590,10 +595,12 @@ function ProviderDialog({ open, initial, costs, trip, onClose, onSave }: DialogP
                       />
                       <span className="flex-1">
                         <span className="font-medium">{c.description || "(sin descripción)"}</span>
-                        <span className="text-muted-foreground">
-                          {" "}— {formatMoney(costBaseAmount(c, trip), baseCurrency)}
-                          {c.perPerson ? " / pers" : ""}
-                        </span>
+                        {showAmounts && (
+                          <span className="text-muted-foreground">
+                            {" "}— {formatMoney(costBaseAmount(c, trip), baseCurrency)}
+                            {c.perPerson ? " / pers" : ""}
+                          </span>
+                        )}
                       </span>
                     </label>
                   );
